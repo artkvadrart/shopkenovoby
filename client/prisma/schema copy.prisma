@@ -1,0 +1,623 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// bunx prisma generate
+// bunx prisma push
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // extensions = [hstore(schema: "myHstoreSchema"), pg_trgm, postgis(version: "2.1")]
+}
+
+
+model Category{
+  id Int @id @default(autoincrement())
+  
+  CategoryDescriptionRu CategoryDescriptionRu @relation("CategoryDescriptionRu", fields: [idCategoryDescriptionRu], references: [id])
+  idCategoryDescriptionRu Int @unique
+
+  CategoryDescriptionEn CategoryDescriptionEn @relation("CategoryDescriptionEn", fields: [idCategoryDescriptionEn], references: [id])
+  idCategoryDescriptionEn Int @unique
+
+  CategoryDescriptionJson CategoryDescriptionJson @relation("CategoryDescriptionJson", fields: [idCategoryDescriptionJson], references: [id])
+  idCategoryDescriptionJson Int @unique
+
+  idParent Int @default(0)
+  categoryPath Int[] //chain of category from Main to Self !!!!!!!!!!!!!!!!!!!!!!!
+  top Boolean @default(false)  //if true category will be in main menu
+  status Int  @default(0)
+
+  furlCategory String @unique // frandly URL  samsung/    hook/
+
+  //!!!!!!!! nameRecomAttributes String[] //name attributes for pruductInThisCategory example:   color, size, diagonal, typeMatrica] 
+  
+  code1c String?
+  codeChange String?
+
+  avatar String?  //link small image if need
+  image String?
+  images String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CategoryDescriptionRu {
+  id Int @id @default(autoincrement())   
+  Category Category? @relation("CategoryDescriptionRu")
+  titleH1 String
+  name String
+  description String
+  metaTitle String
+  metaDescription String
+  metaKeyword String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CategoryDescriptionEn {
+  id Int @id @default(autoincrement()) 
+  Category Category? @relation("CategoryDescriptionEn")
+  titleH1 String
+  name String
+  description String
+  metaTitle String
+  metaDescription String
+  metaKeyword String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CategoryDescriptionJson {
+  id Int @id @default(autoincrement())
+  Category Category? @relation("CategoryDescriptionJson")
+  titleH1 Json
+  name Json
+  description Json
+  metaTitle Json
+  metaDescription Json
+  metaKeyword Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// *******************************************************
+
+model Product {
+  id Int @id @default(autoincrement())
+
+  productDescriptionRu ProductDescriptionRu @relation("ProductDescriptionRu", fields: [idProductDescriptionRu], references: [id])
+  idProductDescriptionRu Int 
+
+  productDescriptionEn ProductDescriptionEn @relation("ProductDescriptionEn", fields: [idProductDescriptionEn], references: [id])
+  idProductDescriptionEn Int 
+
+  productDescriptionJson ProductDescriptionJson @relation("ProductDescriptionJson", fields: [idProductDescriptionJson], references: [id])
+  idProductDescriptionJson Int 
+  
+  joinGroupId Int @default(0) //0- не имеет вариантов товара, х-номер Id Product варианта этого товара 
+  
+  
+  idCategory Int[]
+
+  // Order Order @relation(name:"productOrder")
+  orderInProducts Order @relation(name:"productsOrder", fields: [idOrder], references: [id])
+  idOrder Int
+
+  ordersInProduct Order[] @relation(name:"productOrders")
+
+
+
+  furlProduct String @unique // frandly URL  samsung/    hook/ or = model
+  model String? // модель товара, можно выводить в названия?? пример gsh17
+  sku String? // SKU (аббр. англ. stock keeping unit «единица складского учёта») — устоявшийся международный термин, 
+               //обозначающий идентификатор товарной позиции (артикул), 
+               //GS1 — международная организация, ведающая вопросами стандартизации учёта и штрихового кодирования логистических единиц
+  upc String?
+  ean String? //European Article Number, EAN (европейский номер товара), Является надмножеством американского стандарта UPC. 
+  jan String?  
+  isbn String?
+  mpn String?
+  quantity Int
+  stockStatus StockStatus 
+
+  manufactured Manufacturer @relation("manufactured", fields: [idManufacturer], references: [id])
+  idManufacturer Int 
+
+  price Float
+  price1 Float
+  price2 Float
+
+  priceUSD Float?  
+  priceEUR Float?
+
+  idCurrency Int //?????????????????????????
+
+  points Int?
+  taxClass Int?
+
+  dateAvailabale DateTime  
+
+  weight Float?
+  unitWeightRu UnitWeightRu @relation("UnitWeightRu", fields: [idUnitWeightRu], references: [id])
+  idUnitWeightRu Int
+  unitWeightEn UnitWeightEn @relation("UnitWeightEn", fields: [idUnitWeightEn], references: [id])
+  idUnitWeightEn Int
+  unitWeightJson UnitWeightJson @relation("UnitWeightJson", fields: [idUnitWeightJson], references: [id])
+  idUnitWeightJson Int
+
+  length Float?
+  unitLengthRu UnitLengthRu @relation("UnitLengthRu", fields: [idUnitLengthRu], references: [id])
+  idUnitLengthRu Int
+  unitLengthEn UnitLengthEn @relation("UnitLengthEn", fields: [idUnitLengthEn], references: [id])
+  idUnitLengthEn Int 
+  unitLengthJson UnitLengthJson @relation("UnitLengthJson", fields: [idUnitLengthJson], references: [id])
+  idUnitLengthJson Int   
+
+  width Float?
+  unitWidthRu UnitWidthRu @relation("UnitWidthRu", fields: [idUnitWidthRu], references: [id])
+  idUnitWidthRu Int
+  unitWidthEn UnitWidthEn @relation("UnitWidthEn", fields: [idUnitWidthEn], references: [id])
+  idUnitWidthEn Int
+  unitWidthJson UnitWidthJson @relation("UnitWidthJson", fields: [idUnitWidthJson], references: [id])
+  idUnitWidthJson Int
+
+  height Float?
+  unitHeightRu UnitHeightRu @relation("UnitHeightRu", fields: [idUnitHeightRu], references: [id])
+  idUnitHeightRu Int
+  unitHeightEn UnitHeightEn @relation("UnitHeightEn", fields: [idUnitHeightEn], references: [id])
+  idUnitHeightEn Int
+  unitHeightJson UnitHeightJson @relation("UnitHeightJson", fields: [idUnitHeightJson], references: [id])
+  idUnitHeightJson Int
+  
+  subtract Boolean @default(true) //need to 
+  status Int @default(0)
+
+  avatar String?  //small image if need
+  image String?
+  images String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  }
+
+//***********************************************************************************
+
+model ProductDescriptionRu {
+  id Int @id @default(autoincrement())
+  Product Product[] @relation("ProductDescriptionRu")  
+  name String
+  name1c String
+  description String
+  tag String
+  metaTitle String
+  metaDescription String
+  metaKeyword String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductDescriptionEn {
+  id Int @id @default(autoincrement())
+  Product Product[] @relation("ProductDescriptionEn")  
+  name String
+  name1c String
+  description String
+  tag String
+  metaTitle String
+  metaDescription String
+  metaKeyword String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductDescriptionJson {
+  id Int @id @default(autoincrement())
+  Product Product[] @relation("ProductDescriptionJson")  
+  name Json
+  name1c Json
+  description Json
+  tag Json
+  metaTitle Json
+  metaDescription Json
+  metaKeyword Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//***********************************************************************************
+model UnitWeightRu {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitWeightRu")
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UnitWeightEn {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitWeightEn")
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UnitWeightJson {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitWeightJson")
+  name Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ----------------------------------------------------
+model UnitLengthRu {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitLengthRu")
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UnitLengthEn {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitLengthEn")
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UnitLengthJson {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitLengthJson")
+  name Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ----------------------------------------------------
+
+model UnitWidthRu {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitWidthRu")
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UnitWidthEn {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitWidthEn")
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UnitWidthJson {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitWidthJson")
+  name Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ----------------------------------------------------
+
+model UnitHeightRu {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitHeightRu")
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UnitHeightEn {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitHeightEn")
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UnitHeightJson {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitHeightJson")
+  name Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//***********************************************************************************
+
+model Manufacturer {
+  id Int @id @default(autoincrement())  
+  product Product[] @relation("manufactured")
+  name String
+  image String
+  sort_order Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  }
+
+//***********************************************************************************
+
+model Customer {
+  id Int  @id @default(autoincrement()) 
+  language Language? // идентификатор языка клиента
+  name String
+  email String?
+  mobile String 
+  phone String?  
+  addres String?
+  postalAddres String?
+  otherInfo Json
+
+  order Order[] @relation("orderCustomer")
+
+  note String?
+
+  password String //hash 
+  salt String
+  cart String? //
+
+  wishlist String[]
+  newsletter Boolean @default(false)   
+
+  status Int
+  safe Boolean @default(false)
+  token String
+  code String  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//***********************************************************************************
+
+
+model Order {
+  id Int @id @default(autoincrement())
+  invoice Int 
+  // invoice_prefix (varchar(26)) — префикс счета-фактуры; 
+  
+  customer Customer @relation("orderCustomer", fields: [idCustomer], references: [id]) //relation
+  idCustomer Int
+
+  productsInOrder Product[] @relation(name:"productsOrder") //many product in one this order Recivied List Product
+
+  productInOrders Product @relation(name:"productOrders", fields: [idProduct], references: [id]) //this order in product[]
+  idProduct Int //relation   id product in this  
+
+  note String
+  
+  payer Json // firstname lastname company  address_1  address_2 city postcode country country_id zone zone_id address_format custom_field method code 
+  shipping Json // firstname lastname company  address_1  address_2 city postcode country country_id zone zone_id address_format custom_field method code
+
+  total Float?  // общая сумма заказа; 
+  idCurrency Int // идентификатор валюты, использованной для заказа; 
+
+  payment Payment[] @relation(name:"paymentOrder")
+  
+  orderPayment OrderPayment[] @relation(name:"orderPaymentOrder")
+
+  paymentStatus PaymentStatus // Enum
+  orderStatus OrderStatus // Enum
+
+  // affiliate_id (int) — идентификатор аффилиата, если заказ был сделан через партнёрскую ссылку; 
+  // commission (decimal(15,4)) — сумма комиссии для партнёрской программы; 
+
+  idMarketing  Int // идентификатор маркетинговой кампании 
+  tracking String //код отслеживания маркетинговой кампании; 
+
+  language Language // Enum идентификатор языка, на котором был сделан заказ; 
+ 
+  ip String //  IP-адрес клиента, сделавшего заказ; 
+  ipForwarded String? //  перенаправленный IP-адрес клиента; 
+  userAgent String // пользовательский агент браузера клиента; 
+  acceptLanguage String // предпочитаемый язык клиента; 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+//***************************************************************
+model Payment {
+   id Int @id @default(autoincrement())
+   payment Float
+   datePayment DateTime
+
+   order Order @relation(name:"paymentOrder", fields: [idOrder], references: [id])
+   idOrder Int //relation
+
+   payerInitial Payer @relation("payerInitial", fields: [idPayerInitial], references: [id]) //relation
+   idPayerInitial Int
+
+   payerCorrect Payer @relation("payerCorrect", fields: [idPayerCorrect], references: [id]) //relation
+   idPayerCorrect Int
+
+   orderPayment OrderPayment[] @relation(name:"orderPaymentPayment")
+
+
+
+  //  idPayerCorrect Payer //relation
+ 
+
+
+
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
+}
+
+//***********************************************************************************
+model Payer {
+  id Int  @id @default(autoincrement()) 
+ // language_id (int) — идентификатор языка клиента;
+  paymentInitial Payment[] @relation("payerInitial")
+
+  paymentCorrect Payment[] @relation("payerCorrect")
+
+  name String
+  note String? 
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//***********************************************************************************
+
+model OrderPayment {
+  id Int @id @default(autoincrement())
+
+  order Order @relation(name:"orderPaymentOrder", fields: [idOrder], references: [id])
+  idOrder Int
+  
+  payment Payment @relation(name:"orderPaymentPayment", fields: [idPayment], references: [id])  
+  idPayment Int
+ 
+  description String?
+
+  amount Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt  
+}
+
+//*******************************************************************
+model L18n {
+  id Int @id @default(autoincrement())
+  name String // «English»); 
+  code String // ISO-639-1 (например, «en» для английского); 
+  locale String // локаль языка (например, «en-US.UTF-8,en-US,en-gb,en-gb, english»); 
+  language Language //ENum
+  image String
+
+  sort_order Int @default(0)
+  status Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//*******************
+model Currency {
+id    Int     @id @default(autoincrement())
+codeCurrency String
+valueCurrency Float    // значение валюты относительно базовой валюты магазина; 
+
+}
+
+
+// *********************************************************************************
+// Auth with Prisma Postgres
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  // Optional for WebAuthn support
+  Authenticator Authenticator[]
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+ 
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+ 
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([userId, credentialID])
+}
+
+ enum PaymentStatus {
+  NONEPAID
+  PARTPAID
+  PAID  
+  FAILED  
+}
+
+
+ enum OrderStatus {
+  SUBMITTED
+  PREPARED
+  SENDED
+  END
+  FAILED
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum StockStatus {
+  IS
+  OUT
+}
+
+enum Language {
+  RU
+  EN
+  PL
+  BY
+  UK
+  ES
+}
+
+
+

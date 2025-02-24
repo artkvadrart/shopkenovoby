@@ -1,0 +1,525 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// bunx prisma generate
+// bunx prisma push
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // extensions = [hstore(schema: "myHstoreSchema"), pg_trgm, postgis(version: "2.1")]
+}
+
+
+model Category{
+  id Int @id @default(autoincrement())
+
+  categoryDescriptionJson CategoryDescriptionJson @relation("CategoryDescriptionJson", fields: [idCategoryDescriptionJson], references: [id])
+  idCategoryDescriptionJson Int 
+
+  nameSetParametrsJson NameSetParametrsJson @relation("NameSetParametrsJson", fields: [idNameSetParametrsJson], references: [id]) //name parametrs for filter Product {"p1" : }
+  idNameSetParametrsJson Int 
+
+  product Product @relation("Product", fields: [idProduct], references: [id]) //name parametrs for filter Product {"p1" : }
+  idProduct Int 
+
+  idParent Int @default(0)
+
+  categoryPath Int[] //chain of category from Main to Self !!!!!!!!!!!!!!!!!!!!!!!
+
+  top Boolean @default(false)  //if true category will be in main menu
+  status Int  @default(0)
+
+  furlCategory String @unique // frandly URL  samsung/    hook/
+  //!!!!!!!! nameRecomAttributes String[] //name attributes for pruductInThisCategory example:   color, size, diagonal, typeMatrica] 
+
+
+  code1c String?
+  codeChange String?
+
+  avatar String?  //link small image if need
+  image String?
+  images String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model CategoryDescriptionJson {
+  id Int @id @default(autoincrement())
+  Category Category[] @relation("CategoryDescriptionJson")
+  descriptionData Json // language titleH1 name description metaTitle metaDescription metaKeyword 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model NameSetParametrsJson {
+  id Int @id @default(autoincrement())
+  Category Category[] @relation("NameSetParametrsJson")
+  nameSetParametrs Json // {[ {"language": "ru", "p1":"объем", "p2" : "цвет"}, {"language": "en", "p1":"volume", "p2" : "color"} ] }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+// *******************************************************
+
+model Product {
+  id Int @id @default(autoincrement())
+
+  productDescriptionJson ProductDescriptionJson @relation("ProductDescriptionJson", fields: [idProductDescriptionJson], references: [id])
+  idProductDescriptionJson Int 
+  
+  joinGroupId Int @default(0) //0- не имеет вариантов товара, х-номер Id Product варианта этого товара 
+  
+  category Category[] @relation(name:"Product")
+
+  // Order Order @relation(name:"productOrder")
+  orderInProducts Order @relation(name:"productsOrder", fields: [idOrder], references: [id])
+  idOrder Int
+
+  ordersInProduct Order[] @relation(name:"productOrders")
+
+
+  furlProduct String @unique // frandly URL  samsung/    hook/ or = model
+  model String? // модель товара, можно выводить в названия?? пример gsh17
+  sku String? // SKU (аббр. англ. stock keeping unit «единица складского учёта») — устоявшийся международный термин, 
+               //обозначающий идентификатор товарной позиции (артикул), 
+               //GS1 — международная организация, ведающая вопросами стандартизации учёта и штрихового кодирования логистических единиц
+  upc String?
+  ean String? //European Article Number, EAN (европейский номер товара), Является надмножеством американского стандарта UPC. 
+  jan String?  
+  isbn String?
+  mpn String?
+  quantity Int
+  stockStatus StockStatus 
+
+   price Float
+  price1 Float
+  price2 Float
+
+  priceUSD Float?  
+  priceEUR Float?
+
+  idCurrency Int //?????????????????????????console.log( nameFieldForm['titleH1'+lang.code] );
+  dateAvailabale DateTime  
+
+  weight Float?
+  unitWeightJson UnitWeightJson @relation("UnitWeightJson", fields: [idUnitWeightJson], references: [id])
+  idUnitWeightJson Int
+
+  length Float?
+  unitLengthJson UnitLengthJson @relation("UnitLengthJson", fields: [idUnitLengthJson], references: [id])
+  idUnitLengthJson Int   
+
+  width Float?
+  unitWidthJson UnitWidthJson @relation("UnitWidthJson", fields: [idUnitWidthJson], references: [id])
+  idUnitWidthJson Int
+
+  height Float?
+  unitHeightJson UnitHeightJson @relation("UnitHeightJson", fields: [idUnitHeightJson], references: [id])
+  idUnitHeightJson Int
+
+  setParametrsJson SetParametrsJson @relation("SetParametrsJson", fields: [idSetParametrsJson], references: [id])
+  idSetParametrsJson Int
+
+  manufactured Manufacturer @relation("manufactured", fields: [idManufacturer], references: [id])
+  idManufacturer Int 
+  
+  subtract Boolean @default(true) //need to 
+  status Int @default(0)
+
+  avatar String?  //small image if need
+  image String?
+  images String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  
+ 
+}
+
+//***********************************************************************************
+
+model ProductDescriptionJson {
+  id Int @id @default(autoincrement())
+  Product Product[] @relation("ProductDescriptionJson")  
+  description Json // name name1c description tag metaTitle metaDescription metaKeyword 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+//***********************************************************************************
+
+model UnitWeightJson {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitWeightJson")
+  name Json //  { [{"ru": "name"}, ......] }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+// ----------------------------------------------------
+
+model UnitLengthJson {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitLengthJson")
+  name Json //  { [{"ru": "name"}, ......] }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+// ----------------------------------------------------
+
+model UnitWidthJson {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitWidthJson")
+  name Json //  { [{"ru": "name"}, ......] }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+// ----------------------------------------------------
+
+model UnitHeightJson {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("UnitHeightJson")
+  name Json //  { [{"ru": "name"}, ......] }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+// ----------------------------------------------------
+
+model SetParametrsJson {
+  id    Int  @id @default(autoincrement())  
+  product Product[] @relation("SetParametrsJson")
+  setParametrsJson Json //  { [{"ru": "name"}, ......] }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+
+
+
+//***********************************************************************************
+
+model Manufacturer {
+  id Int @id @default(autoincrement())  
+  product Product[] @relation("manufactured")
+  name String
+  nameJSON Json //  { [{"ru": "nameJSON"}, ......] }
+  image String
+  sort_order Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  }
+
+//***********************************************************************************
+
+model Customer {
+  id Int  @id @default(autoincrement()) 
+  language Language? // идентификатор языка клиента
+  name String
+  email String?
+  mobile String 
+  phone String?  
+  addres String?
+  postalAddres String?
+  otherInfo Json
+
+  order Order[] @relation("orderCustomer")
+
+  note String?
+
+  password String //hash 
+  salt String
+  cart String? //
+
+  wishlist String[]
+  newsletter Boolean @default(false)   
+
+  status Int
+  safe Boolean @default(false)
+  token String
+  code String  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+//***********************************************************************************
+
+
+model Order {
+  id Int @id @default(autoincrement())
+  invoice Int 
+  // invoice_prefix (varchar(26)) — префикс счета-фактуры; 
+  
+  customer Customer @relation("orderCustomer", fields: [idCustomer], references: [id]) //relation
+  idCustomer Int
+
+  productsInOrder Product[] @relation(name:"productsOrder") //many product in one this order Recivied List Product
+
+  productInOrders Product @relation(name:"productOrders", fields: [idProduct], references: [id]) //this order in product[]
+  idProduct Int //relation   id product in this  
+
+  note String
+  
+  payer Json // firstname lastname company  address_1  address_2 city postcode country country_id zone zone_id address_format custom_field method code 
+  shipping Json // firstname lastname company  address_1  address_2 city postcode country country_id zone zone_id address_format custom_field method code
+
+  total Float?  // общая сумма заказа; 
+  idCurrency Int // идентификатор валюты, использованной для заказа; 
+
+  payment Payment[] @relation(name:"paymentOrder")
+  
+  orderPayment OrderPayment[] @relation(name:"orderPaymentOrder")
+
+  paymentStatus PaymentStatus // Enum
+  orderStatus OrderStatus // Enum
+
+  // affiliate_id (int) — идентификатор аффилиата, если заказ был сделан через партнёрскую ссылку; 
+  // commission (decimal(15,4)) — сумма комиссии для партнёрской программы; 
+
+  idMarketing  Int // идентификатор маркетинговой кампании 
+  tracking String //код отслеживания маркетинговой кампании; 
+
+  language Language // Enum идентификатор языка, на котором был сделан заказ; 
+ 
+  ip String //  IP-адрес клиента, сделавшего заказ; 
+  ipForwarded String? //  перенаправленный IP-адрес клиента; 
+  userAgent String // пользовательский агент браузера клиента; 
+  acceptLanguage String // предпочитаемый язык клиента; 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+}
+
+//***************************************************************
+model Payment {
+   id Int @id @default(autoincrement())
+   payment Float
+   datePayment DateTime
+
+   order Order @relation(name:"paymentOrder", fields: [idOrder], references: [id])
+   idOrder Int //relation
+
+   payerInitial Payer @relation("payerInitial", fields: [idPayerInitial], references: [id]) //relation
+   idPayerInitial Int
+
+   payerCorrect Payer @relation("payerCorrect", fields: [idPayerCorrect], references: [id]) //relation
+   idPayerCorrect Int
+
+   orderPayment OrderPayment[] @relation(name:"orderPaymentPayment")
+
+  //  idPayerCorrect Payer //relation
+
+   createdAt DateTime @default(now())
+   updatedAt DateTime @default(now()) @updatedAt
+}
+
+//***********************************************************************************
+model Payer {
+  id Int  @id @default(autoincrement()) 
+ // language_id (int) — идентификатор языка клиента;
+  paymentInitial Payment[] @relation("payerInitial")
+
+  paymentCorrect Payment[] @relation("payerCorrect")
+
+  name String
+  note String? 
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+//***********************************************************************************
+
+model OrderPayment {
+  id Int @id @default(autoincrement())
+
+  order Order @relation(name:"orderPaymentOrder", fields: [idOrder], references: [id])
+  idOrder Int
+  
+  payment Payment @relation(name:"orderPaymentPayment", fields: [idPayment], references: [id])  
+  idPayment Int
+ 
+  description String?
+
+  amount Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+//*******************************************************************
+model L18n {
+  id Int @id @default(autoincrement())
+  name String // «English»); 
+  code String // ISO-639-1 (например, «en» для английского); 
+  locale String // локаль языка (например, «en-US.UTF-8,en-US,en-gb,en-gb, english»); 
+  language Language //ENum Active Language
+  image String
+  time String
+  colorText String @default("black")
+  colorBackground String @default("white")
+  sort_order Int @default(0)
+  status Boolean //active or no
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+//*******************
+model I18n {
+  id Int @id @default(autoincrement())
+  name String // «English»); 
+  code String // ISO-639-1 (например, «en» для английского); 
+  locale String // локаль языка (например, «en-US.UTF-8,en-US,en-gb,en-gb, english»); 
+  language Language //ENum Active Language
+  image String
+  time String
+  colorText String @default("black")
+  colorBackground String @default("white")
+  sort_order Int @default(0)
+  status Boolean //active or no
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+//*******************
+
+model Currency {
+id    Int     @id @default(autoincrement())
+codeCurrency String
+valueCurrency Float    // значение валюты относительно базовой валюты магазина; 
+
+}
+
+
+// *********************************************************************************
+// Auth with Prisma Postgres
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  // Optional for WebAuthn support
+  Authenticator Authenticator[]
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+ 
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+ 
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+ 
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([userId, credentialID])
+}
+
+ enum PaymentStatus {
+  NONEPAID
+  PARTPAID
+  PAID  
+  FAILED  
+}
+
+
+ enum OrderStatus {
+  SUBMITTED
+  PREPARED
+  SENDED
+  END
+  FAILED
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum StockStatus {
+  IS
+  OUT
+}
+
+enum Language {
+  RU
+  EN
+  PL
+  BY
+  UK
+  ES
+}
+
+enum NameModelJson {
+  CategoryDescriptionJson
+  NameSetParametrsJson
+  ProductDescriptionJson
+  UnitWeightJson
+  UnitLengthJson
+  UnitWidthJson
+  UnitHeightJson
+  SetParametrsJson
+  
+
+}
+
+
+
