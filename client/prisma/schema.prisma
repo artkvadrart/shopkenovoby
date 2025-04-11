@@ -30,9 +30,9 @@ model Category{
   product Product @relation("Product", fields: [idProduct], references: [id]) //name parametrs for filter Product {"p1" : }
   idProduct Int 
 
-  idParent Int @default(0)
-
-  categoryPath Int[] //chain of category from Main to Self !!!!!!!!!!!!!!!!!!!!!!!
+  idParent Int @default(0)  // ??????
+  categoryPath Int[] @default([]) //chain of category from Main to Self !!!!!!!!!!!!!!!!!!!!!!!
+  // full path it is array   [...categoryPath , id ] (category)  
 
   top Boolean @default(false)  //if true category will be in main menu
   status Int  @default(0)

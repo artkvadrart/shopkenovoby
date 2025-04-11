@@ -1,7 +1,7 @@
 'use client'
 import { use } from 'react'
 import React from 'react'
-import { $Enums } from '@prisma/client'
+import { $Enums, L18n } from '@prisma/client'
 import { z } from 'zod'
 import { iArrayNameFormField, INameFieldForm, INameFieldFormZod } from '@/types'
 import { useForm } from 'react-hook-form'
@@ -16,7 +16,7 @@ import { categoryInputFormFieldsDescriptionJson,
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import { Button } from '@/components/ui/button'
 import getTypeField from '@/app/db/categories/input/components/get-type-field'
-
+import axios from 'axios'
 
 export default function FormFieldsCyclic({
    activeLanguagesProps   
@@ -165,21 +165,22 @@ const formDefaultValues = {
   })
 
 
-  const onSubmitWork =  (data: z.infer<typeof formSchema>) => {  
-    toast.success(`God : `, { duration: 7000 });
-      console.log(`!!!!!!!!!!!!`);
-      console.log(`8888888888888888888888888 data:${data}`);   
+  const onSubmitWork = async  (data: z.infer<typeof formSchema>) => {      
+    toast.success(`God : `, { duration: 7000 });      
     try {
       toast.success(`Dog :  `, { duration: 7000 });
-      console.log(`!!!!!!!!!!!!`);
-      console.log(`*******************data:${data}`);
+      console.log(`!!! Data:`);
+      // console.dir(nameFieldForm, { depth: null })
+      console.dir(data, { depth: null });
+
       // setLoading( value =>  value = true );
-      // await axios.post(`/api/order`, data)
-      // .then( (orderDb)=>{
-      //   //  console.log(` ------------- ${orderDb.data} `);
-      //   toast.success(` ${formLanguage[language].resultOkOrderMessage} : ${orderDb.data} `, { duration: 7000 });})
+      await axios.post(`/api/input`, data )
+      .then( (responseRoute)=>{
+        console.log(` responseRouteCategoryInput ------------- ${responseRoute.data} `);
+      //   toast.success(` ${formLanguage[language].resultOkOrderMessage} : ${orderDb.data} `, { duration: 7000 });
+      })
       // .then( () => {setLoading( value =>  value = false ); })
-      // .catch( () => {toast.error(`${formLanguage[language].resultErrorOrderMessage}`, { duration: 7000 }); })
+      .catch( (error) => {toast.error(`Error response result: ${error}`, { duration: 7000 }); })
       // .finally( () => {setLoading( value =>  value = false ); })
 
       // const toastMessage = JSON.stringify(data, null, 2);
@@ -193,7 +194,8 @@ const formDefaultValues = {
       //   address: '',
       //   phone: '',      
       //   note: ''    
-      // } );       
+
+     //  } );       
       
 
       // setTimeout( ( ) => { 
@@ -204,7 +206,8 @@ const formDefaultValues = {
       // setLoading( value =>  value = false ); 
 
     } catch (error: any) {
-      toast.error(`error`, { duration: 5000 });      
+      console.log(` ErrorrErro ------------- ${error} `);
+      toast.error(`ErrorrError`, { duration: 5000 });      
       // setLoading( value =>  value = false );    
     } finally {
       // setLoading( value =>  value = false );     
