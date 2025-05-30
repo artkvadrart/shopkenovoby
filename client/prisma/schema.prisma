@@ -10,6 +10,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -17,18 +21,47 @@ datasource db {
 }
 
 
+
 model Category{
   id Int @id @default(autoincrement())
 
-  categoryDescriptionJson Json? // 
-  // {"en": { "titleH1": " ", "name" : "", "description" : "", "metaTitle" : ""}}
-  categorySeoMetaJson Json? // 
-  // {"en": { "metaTitle" : "", "metaDescription" : "", "metaKeyword" : ""}}
-  nameSetParametrsJson Json? // FOR PRODUCT
-  // {"en": { "param1": " ", "param2" : "", "color" : "", "volume" : ""}}
+  /// [typeCategoryNameJson]
+  categoryNameJson Json /// [typeCategoryNameJson] 
+  // {"en": { "name" : "nameEN"}, "ru": { "name" : "nameRU"}, "by": {"name" : "nameBY"}  }
 
-  product Product @relation("Product", fields: [idProduct], references: [id]) //name parametrs for filter Product {"p1" : }
-  idProduct Int 
+  /// [typeCategoryDescriptionJson]
+  categoryDescriptionJson Json  /// [typeCategoryDescriptionJson] // 
+  // {"en": { "titleH1": "titleH1EN", "name" : "nameEN", "description" : "descriptionEN", "metaTitle" : "metaTitleEN"},
+  //  "ru": { "titleH1": "titleH1RU", "name" : "nameRU", "description" : "descriptionRU", "metaTitle" : "metaTitleRU"},
+  //  "by": { "titleH1": "titleH1BY", "name" : "nameBY", "description" : "descriptionBY", "metaTitle" : "metaTitleBY"}  }
+
+  /// [typeCategorySeoMetaJson]
+  categorySeoMetaJson Json  /// [typeCategorySeoMetaJson]
+  // {"en": { "metaTitle" : "metaTitleEN", "metaDescription" : "metaDescriptionEN", "metaKeyword" : "metaKeywordEN"},
+      // "ru": { "metaTitle" : "metaTitleRU", "metaDescription" : "metaDescriptionRU", "metaKeyword" : "metaKeywordRU"},
+      // "by": { "metaTitle" : "metaTitleBY", "metaDescription" : "metaDescriptionBY", "metaKeyword" : "metaKeywordBY"}}
+
+  /// [typeCategoryNameSetParametrsJson]    
+  categoryNameSetParametrsJson Json /// [typeCategoryNameSetParametrsJson]
+  // {"en": { "param1": "param1EN", "param2" : "param2EN", "volume" : "volumeEN"},
+      // "ru": { "param1": "param1RU", "param2" : "param2RU", "volume" : "volumeRU"},
+      // "by": { "param1": "param1BY", "param2" : "param2BY", "volume" : "volumeBY"} }
+
+  /// [typeNameSetParametrsJson]    
+  //nameSetParametrsJson Json /// [typeNameSetParametrsJson]
+  // {"en": { "param1": "param1EN", "param2" : "param2EN", "volume" : "volumeEN"},
+      // "ru": { "param1": "param1RU", "param2" : "param2RU", "volume" : "volumeRU"},
+      // "by": { "param1": "param1BY", "param2" : "param2BY", "volume" : "volumeBY"} }
+
+ // product Product @relation("Product", fields: [idProduct], references: [id]) //name parametrs for filter Product {"p1" : }
+  // idProduct Int 
+
+  // category Category[] @relation(name:"Product")
+  product Product[] @relation(name:"Product")
+
+  // category Product @relation("CategoryProduct", fields: [idProduct], references: [id]) //name parametrs for filter Product {"p1" : }
+  // idProduct Int 
+
 
   idParent Int @default(0)  // ??????
   categoryPath Int[] @default([]) //chain of category from Main to Self !!!!!!!!!!!!!!!!!!!!!!!
@@ -44,7 +77,7 @@ model Category{
 
   avatar String?  //link small image if need
   image String?
-  images String[]
+  images String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
@@ -62,7 +95,11 @@ model Product {
   
   joinGroupId Int @default(0) //0- не имеет вариантов товара, х-номер Id Product варианта этого товара 
   
-  category Category[] @relation(name:"Product")
+  // category Category[] @relation(name:"Product")
+
+  product Category @relation("Product", fields: [idCategory], references: [id]) //name parametrs for filter Product {"p1" : }
+  idCategory Int 
+
 
   // Order Order @relation(name:"productOrder")
   orderInProducts Order @relation(name:"productsOrder", fields: [idOrder], references: [id])
@@ -361,7 +398,7 @@ model L18n {
 }
 
 //*******************
-model I18n {
+model I18n {   ////  need dELETE
   id Int @id @default(autoincrement())
   name String // «English»); 
   code String // ISO-639-1 (например, «en» для английского); 

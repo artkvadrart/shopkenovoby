@@ -1,20 +1,38 @@
 import prismadb from "@/lib/prismadb";
 
 const getCategories = async () => {
-  const allCategories = await prismadb.category.findMany({
+  await prismadb.category.findMany({
     where: {      
       status: 1,
     }
-  });
-  return allCategories;
+  })
 };
+
 
 const getPathsCategories = async () => {
   const pathsCategories = await prismadb.category.findMany({
-    where: {      
-      status: 1,
+    select: {
+    id: true,
+    categoryNameJson: true,
+ //   categoryDescriptionJson: true,
+    idParent: true,
+    categoryPath: true
     }
+    
   });
+
+
+  const categoriesArr = []
+  pathsCategories.map((item) => {
+  console.log(`!!!!!!!!!item.id=${item.id}, item.categoryNameJson=${item.categoryNameJson}, item.idParent=${item.idParent}, item.categoryPath=${item.categoryPath}`);
+     // return {
+    //   id: item.id,
+    //   categoryDescriptionJson: item.categoryDescriptionJson,
+    //   idParent: item.idParent,
+    //   categoryPath: item.categoryPath,
+    // }
+  })
+  
   return pathsCategories;
 };
 

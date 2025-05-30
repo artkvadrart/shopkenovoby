@@ -1,6 +1,7 @@
 import React from "react";
 import FormFieldsCyclic from "./components/form-fields-cyclic";
-import { getActiveLanguages } from "@/utils/get-active-languages";
+import { getActiveLanguages, getBaseLanguage } from "@/utils/get-active-languages";
+import { getPathsCategories} from "@/utils/get-categories"
 
 function InputCategoryPage( 
 ) {
@@ -9,7 +10,9 @@ function InputCategoryPage(
   return (
     <div>      
       <FormFieldsCyclic 
-       activeLanguagesProps={getActiveLanguages()}     
+       activeLanguagesProps={getActiveLanguages()}  
+       baseLanguageProps={getBaseLanguage()}  
+       getPathsCategoriesProps={getPathsCategories()}
       />
     </div>
   );

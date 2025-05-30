@@ -1,7 +1,7 @@
 import { z, ZodTypeAny } from "zod";
 
 export interface INameFieldForm {
-  [key: string]:  string | number | boolean ;
+  [key: string]:  string | number | boolean | string[] | number [];
 }
 
 export interface iArrayNameFormField {
@@ -15,9 +15,10 @@ export interface iArrayNameFormField {
   labelfield: string,
   placeholderfield: string,
   descriptionfiled: string,
-  defaultfield: string | number | boolean,
-  zod: z.AnyZodObject | z.ZodString | z.ZodNumber | z.ZodBoolean,
-  typefield: "textarea" | "checkbox" | "input" | "number" | "url" | "file" | "select" ,
+  defaultfield: string | number | boolean | string[] | number [],
+  // zod: z.AnyZodObject | z.ZodString | z.ZodNumber | z.ZodBoolean | z.ZodTypeAny | z.ArrayCardinality ,
+  zod: z.ZodTypeAny ,
+  typefield: "textarea" | "checkbox" | "input" | "switch" | "number" | "url" | "file" | "select",
 }
 
 export interface INameFieldFormZod {
