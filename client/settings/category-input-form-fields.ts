@@ -21,7 +21,7 @@ interface IcategoryInputFormFieldsItem {
   // zod: z.AnyZodObject | z.ZodString | z.ZodNumber | z.ZodBoolean | z.ZodTypeAny | z.ArrayCardinality,
   // zod: z.AnyZodObject | z.ZodString | z.ZodNumber | z.ZodBoolean | z.ZodTypeAny | z.ArrayCardinality,
   zod: z.ZodTypeAny ,
-  typefield: "textarea" | "checkbox" | "input" | "number" | "url" | "file" | "select" ,
+  typefield: "textarea" | "checkbox" | "input" | "number" | "url" | "file" | "selectCategoryPath" ,
   callFunc : string
 }
 
@@ -213,8 +213,9 @@ export const categoryInputFormFieldsNameSetParametrsJson : IcategoryInputFormFie
 
 export const categoryInputFormFieldsNoTranslateData : IcategoryInputFormFields = {
   ru : [
-    {namefield : "idParent", labelfield : "родительская категория", placeholderfield : "родительская категория", descriptionfiled : "введите родительскую категорию", defaultfield : 1, zod : z.coerce.number().min(1), typefield : "number", callFunc :  ""},
-    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "select", callFunc :  "getPathsCategories"},
+    // for delete {namefield : "idParent", labelfield : "родительская категория", placeholderfield : "родительская категория", descriptionfiled : "введите родительскую категорию", defaultfield : 1, zod : z.coerce.number().min(1), typefield : "number", callFunc :  ""},
+    // **** categoryPath  react hook form не поддерживает select multiple поэтому categoryPath не массив, а строка(которая потом преобразуется в массив и обратно)
+    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "selectCategoryPath", callFunc :  "getPathsCategories"},
     // {namefield : "top", labelfield : "показывать в меню", placeholderfield : "показывать в меню", descriptionfiled : "отметьте если необходимо показать категорию в меню", defaultfield : false,  zod : z.boolean(), typefield : "checkbox", callFunc :  ""},
     // {namefield : "status", labelfield : "статус категории", placeholderfield : "статус категории", descriptionfiled : "статус категории", defaultfield : "actived",  zod : z.string().min(5), typefield : "switch", callFunc :  ""},
     {namefield : "furlCategory", labelfield : "seo имя категории", placeholderfield : "seo имя категории", descriptionfiled : "введите seo имя категории (пример: /hook)", defaultfield : "hooker",  zod : z.string().min(5), typefield : "input", callFunc :  ""},
@@ -225,8 +226,8 @@ export const categoryInputFormFieldsNoTranslateData : IcategoryInputFormFields =
     // {namefield : "images", labelfield : "набор изображений", placeholderfield : "набор изображений", descriptionfiled : "набор изображений", defaultfield : "",  zod : z.string().min(5), typefield : "file", callFunc :  ""},
   ],
   en : [
-    {namefield : "idParent", labelfield : "родительская категория", placeholderfield : "родительская категория", descriptionfiled : "введите родительскую категорию", defaultfield : 1,  zod : z.coerce.number().min(1), typefield : "number", callFunc :  ""},
-    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "select", callFunc :  "getPathsCategories"},
+    // for delete {namefield : "idParent", labelfield : "родительская категория", placeholderfield : "родительская категория", descriptionfiled : "введите родительскую категорию", defaultfield : 1,  zod : z.coerce.number().min(1), typefield : "number", callFunc :  ""},
+    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "selectCategoryPath", callFunc :  "getPathsCategories"},
     // {namefield : "top", labelfield : "показывать в меню", placeholderfield : "показывать в меню", descriptionfiled : "отметьте если необходимо показать категорию в меню", defaultfield : false,  zod : z.boolean(), typefield : "checkbox", callFunc :  ""},
     // {namefield : "status", labelfield : "статус категории", placeholderfield : "статус категории", descriptionfiled : "статус категории", defaultfield : "",  zod : z.string().min(5), typefield : "switch", callFunc :  ""},
     {namefield : "furlCategory", labelfield : "seo имя категории", placeholderfield : "seo имя категории", descriptionfiled : "введите seo имя категории (пример: /hook)", defaultfield : "hooker",  zod : z.string().min(5), typefield : "input", callFunc :  ""},
@@ -237,8 +238,8 @@ export const categoryInputFormFieldsNoTranslateData : IcategoryInputFormFields =
     // {namefield : "images", labelfield : "набор изображений", placeholderfield : "набор изображений", descriptionfiled : "набор изображений", defaultfield : "",  zod : z.string().min(5), typefield : "file", callFunc :  ""},
   ],
   by : [
-    {namefield : "idParent", labelfield : "родительская категория", placeholderfield : "родительская категория", descriptionfiled : "введите родительскую категорию", defaultfield : 1,  zod : z.coerce.number().min(1), typefield : "number", callFunc :  ""},
-    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "select", callFunc :  "getPathsCategories"},
+    // for delete {namefield : "idParent", labelfield : "родительская категория", placeholderfield : "родительская категория", descriptionfiled : "введите родительскую категорию", defaultfield : 1,  zod : z.coerce.number().min(1), typefield : "number", callFunc :  ""},
+    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "selectCategoryPath", callFunc :  "getPathsCategories"},
     // {namefield : "top", labelfield : "показывать в меню", placeholderfield : "показывать в меню", descriptionfiled : "отметьте если необходимо показать категорию в меню", defaultfield : false,  zod : z.boolean(), typefield : "checkbox", callFunc :  ""},
     // {namefield : "status", labelfield : "статус категории", placeholderfield : "статус категории", descriptionfiled : "статус категории", defaultfield : "",  zod : z.string().min(5), typefield : "switch", callFunc :  ""},
     {namefield : "furlCategory", labelfield : "seo имя категории", placeholderfield : "seo имя категории", descriptionfiled : "введите seo имя категории (пример: /hook)", defaultfield : "hooker",  zod : z.string().min(5), typefield : "input", callFunc :  ""},
@@ -251,6 +252,18 @@ export const categoryInputFormFieldsNoTranslateData : IcategoryInputFormFields =
   
 }
 
+
+export const categoryInputFormFieldsSelectedImages : IcategoryInputFormFields  = {
+  ru :  [   
+    {namefield : "alt", labelfield : "alt тег", placeholderfield : "картинка для", descriptionfiled : "введите тег ALT картинки", defaultfield : "картинка для kenovo1",  zod : z.string().min(5), typefield : "input", callFunc :  ""},    
+  ],
+  en :  [   
+    {namefield : "alt", labelfield : "alt tag", placeholderfield : "image for", descriptionfiled : "input tag ALT image", defaultfield : "img for kenovo1",  zod : z.string().min(5), typefield : "input", callFunc :  ""},    
+  ],
+  by :  [    
+    {namefield : "alt", labelfield : "alt тэг", placeholderfield : "маляванка для", descriptionfiled : "введите тег ALT картинки", defaultfield : "маляванка для kenovo1",  zod : z.string().min(5), typefield : "input", callFunc :  ""},    
+  ] 
+}
 
 
 

@@ -1,11 +1,10 @@
 import React from "react";
 import FormFieldsCyclic from "./components/form-fields-cyclic";
-import { getActiveLanguages, getBaseLanguage } from "@/utils/get-active-languages";
+import { getActiveLanguages, getBaseLanguage } from "@/utils/get-languages";
 import { getPathsCategories} from "@/utils/get-categories"
 
 function InputCategoryPage( 
 ) {
-  // for (const key in formDefaultValues) {console.log(`key: ${key} - ${formDefaultValues[key]} `); }
 
   return (
     <div>      

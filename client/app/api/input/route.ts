@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import {
   getActiveLanguages,
   getBaseLanguage,
-} from "@/utils/get-active-languages";
+} from "@/utils/get-languages";
 
 import {
   categoryInputFormFieldsNameJson,
@@ -21,13 +21,26 @@ import prismadb from "@/lib/prismadb";
 export async function POST(request: Request) {
   try {
     const activeLanguages = await getActiveLanguages();
-    const baseLanguage = await getBaseLanguage();
-    var baseLanguageCode: string = "ru";
+    const baseLanguage = await getBaseLanguage();    
+    var baseLanguageCode: string = "ru";    
     baseLanguage
       ? (baseLanguageCode = baseLanguage.code)
       : (baseLanguageCode = "ru");
-    const body = await request.json();
+      
+const formData = await request.formData();
 
+console.log('formDataServer11data', formData.getAll("data"));
+// const body = JSON.parse( formData.get('data') );
+const dataValue = formData.get('data');
+const body = dataValue !== null ? JSON.parse(dataValue as string) : null;
+
+console.log('formDataServer11fromEditorJson', formData.getAll("fromEditorJson"));
+const fromEditorJson = formData.getAll('fromEditorJson');
+
+
+   
+    
+    
     // nulled elements Zod and ArrayValueForm
     const nameFieldForm: INameFieldFormZod = {}; //формирование названий полей формы, для zod
     const arrayNameFormFieldNameJson: Array<iArrayNameFormField> = [];
@@ -156,7 +169,7 @@ export async function POST(request: Request) {
 
 
 
-
+ throw new Error("error no ne sovsem1");
     const orderDb = await prismadb.category.create({
       data: {
         categoryNameJson: insertToCategoryNameJson,

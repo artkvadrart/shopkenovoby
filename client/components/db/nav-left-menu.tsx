@@ -10,6 +10,8 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command"
+import { SiMake } from "react-icons/si";
+import { SlList, SlBag, SlBookOpen, SlSocialInstagram, SlSocialFacebook, SlSocialPintarest, SlCalender, SlPeople, SlChart, SlRefresh, SlSettings, SlWrench } from "react-icons/sl";
 
 interface INavLeftMenuProps {
   active: string
@@ -20,39 +22,36 @@ function NavLeftMenu(
 ) {
   return (
     <nav>
-    <div>  {active}
-
-    <Command>
+    <div>  
+    <Command className='mt-4 rounded-none'>
   <CommandInput placeholder="Type a command or search..." />
   <CommandList>
     <CommandEmpty>No results found.</CommandEmpty>
     <CommandGroup heading="Каталог">
-      <CommandItem><a href="#">Категории</a></CommandItem>
-      <CommandItem>Продукты</CommandItem>
-      <CommandItem>Информация</CommandItem>
+      <CommandItem><SlList className="text-gray-600"/><span>Категории</span></CommandItem>
+      <CommandItem><SlBag className="text-gray-600"/><span>Продукты</span></CommandItem>
+      <CommandItem><SlBookOpen className="text-gray-600"/><span>Информация</span></CommandItem>
     </CommandGroup>
     <CommandSeparator />
     <CommandGroup heading="Социальные сети">
-      <CommandItem>Instagram</CommandItem>      
-      <CommandItem>Meta</CommandItem>
-      <CommandItem>Pinterest</CommandItem>      
+      <CommandItem><SlSocialInstagram className="text-gray-600"/><span>Instagram</span></CommandItem>      
+      <CommandItem><SlSocialFacebook className="text-gray-600"/><span>Meta</span></CommandItem>
+      <CommandItem><SlSocialPintarest className="text-gray-600"/><span>Pinterest</span></CommandItem>      
     </CommandGroup>
     <CommandSeparator />
     <CommandGroup heading="Анализ">
-      <CommandItem>Заказы</CommandItem>      
-      <CommandItem>Клиенты</CommandItem>
-      <CommandItem>Анализ</CommandItem>      
-      <CommandItem>Экспорт/Импорт</CommandItem>      
+      <CommandItem><SlCalender className="text-gray-600"/><span>Заказы</span></CommandItem>     
+      <CommandItem><SlPeople className="text-gray-600"/><span>Клиенты</span></CommandItem>
+      <CommandItem><SlChart className="text-gray-600"/><span>Анализ</span></CommandItem>      
+      <CommandItem><SlRefresh className="text-gray-600"/><span>Экспорт/Импорт</span></CommandItem>      
     </CommandGroup>
     <CommandSeparator />
     <CommandGroup heading="Настройки">
-      <CommandItem>Основные</CommandItem>
-      <CommandItem>Социальные сети</CommandItem>      
+      <CommandItem><SlSettings className="text-gray-600"/><span>Основные</span></CommandItem>
+      <CommandItem><SlWrench className="text-gray-600"/><span>Социальные сети</span></CommandItem>      
     </CommandGroup>
   </CommandList>
 </Command>
-
-
     </div>
     </nav>
   )

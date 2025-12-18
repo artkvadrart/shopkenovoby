@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { array } from "zod";
+import z, { array } from "zod";
 import {zodResolver} from "@hookform/resolvers/zod"
 import { JsonValue } from "@prisma/client/runtime/library";
 import { Switch } from "@radix-ui/react-switch";
@@ -20,10 +20,12 @@ import { it } from "node:test";
 import { $Enums, Prisma } from "@prisma/client";
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
+import { formSchema } from "./category-zod-default-formfield";
 
 
 interface iGetTypeFieldProps {
-  form: UseFormReturn<{ [x: string]: any; }, any, undefined>
+  // form: UseFormReturn<{ [x: string]: any; }, any, undefined>
+  form: z.infer<typeof formSchema> | any | undefined,
   indexGet: number | string,
   namefield: string,
   namefieldlang: string,
@@ -31,7 +33,7 @@ interface iGetTypeFieldProps {
   placeholderfield: string,
   descriptionfiled: string,
   defaultfield: string | number | boolean | string[] | number[],
-  typefield: "textarea" | "checkbox" | "input" | "switch" | "number" | "url" | "file" | "select",
+  typefield: "textarea" | "checkbox" | "input" | "switch" | "number" | "url" | "file" | "selectCategoryPath",
   field: any,
   activeLanguages: {
     id: number;
@@ -50,8 +52,8 @@ interface iGetTypeFieldProps {
      // categoryNameJson: iJsonLangCategories;
     categoryNameJson: PrismaJson.typeCategoryNameJson ;
    // categoryDescriptionJson: JsonValue;
-    idParent: number;
-    categoryPath: number[];
+   //  idParent: number; for delete
+    categoryPath: string;
     valuesSelectCategoryPath?: number[];
     numberReversSortCategoryPath?: number
 }[],
@@ -90,14 +92,14 @@ const GetTypeField : React.FC <iGetTypeFieldProps>  = function (
     baseLanguageCode
   }
 )  {
-  if (typefield === "input") return <div><Label htmlFor={`${namefieldlang}input${indexGet}`}>{labelfield}</Label><Input id={`${namefieldlang}input${indexGet}`} placeholder={placeholderfield} {...field} /></div>
-  if (typefield === "textarea") return <div><Label htmlFor={`${namefieldlang}textarea${indexGet}`}>{labelfield}</Label><Textarea id={`${namefieldlang}textarea${indexGet}`} placeholder={placeholderfield} {...field} /></div>
-  if (typefield === "checkbox") return <div><Label htmlFor={`${namefieldlang}checkbox${indexGet}`}>{labelfield}</Label><Checkbox id={`${namefieldlang}checkbox${indexGet}`} {...field} /></div>  
+  if (typefield === "input") return <div><Label htmlFor={`${namefieldlang}input${indexGet}`}>{labelfield}</Label><Input id={`${namefieldlang}input${indexGet}`} placeholder={placeholderfield} {...field} className="bg-white" /></div>
+  if (typefield === "textarea") return <div><Label htmlFor={`${namefieldlang}textarea${indexGet}`}>{labelfield}</Label><Textarea id={`${namefieldlang}textarea${indexGet}`} placeholder={placeholderfield} {...field} className="bg-white"/></div>
+  if (typefield === "checkbox") return <div><Label htmlFor={`${namefieldlang}checkbox${indexGet}`}>{labelfield}</Label><Checkbox id={`${namefieldlang}checkbox${indexGet}`} {...field} className="bg-white" /></div>  
   // for status true or false
  // if (typefield === "switch") return <div><Label htmlFor={`${namefieldlang}`}>{labelfield}</Label><Switch  checked={field.value}  onCheckedChange={{...field}} id={`${namefieldlang} `}/>{...field}</div>  
-  if (typefield === "number") return <div><Label htmlFor={`${namefieldlang}number${indexGet}`}>{labelfield}</Label><Input id={`${namefieldlang}number${indexGet}`} placeholder={placeholderfield} type="number" {...field} /></div>
-  if (typefield === "url") return <div><Label htmlFor={`${namefieldlang}url${indexGet}`}>{labelfield}</Label><Input id={`${namefieldlang}url${indexGet}`} placeholder={placeholderfield} {...field} /></div>
-  if (typefield === "file") return <div><Label htmlFor={`${namefieldlang}file${indexGet}`}>{labelfield}</Label><Input type="file" id={`${namefieldlang}file${indexGet}`} placeholder={placeholderfield} {...field} /></div>
+  if (typefield === "number") return <div><Label htmlFor={`${namefieldlang}number${indexGet}`}>{labelfield}</Label><Input id={`${namefieldlang}number${indexGet}`} placeholder={placeholderfield} type="number" {...field} className="bg-white" /></div>
+  if (typefield === "url") return <div><Label htmlFor={`${namefieldlang}url${indexGet}`}>{labelfield}</Label><Input id={`${namefieldlang}url${indexGet}`} placeholder={placeholderfield} {...field} className="bg-white" /></div>
+  if (typefield === "file") return <div><Label htmlFor={`${namefieldlang}file${indexGet}`}>{labelfield}</Label><Input type="file" id={`${namefieldlang}file${indexGet}`} placeholder={placeholderfield} {...field} className="bg-white"/></div>
   
   
   // typefield select
@@ -106,7 +108,7 @@ const GetTypeField : React.FC <iGetTypeFieldProps>  = function (
 
   // sample   idCategory   pathsCategories   pathsCategories[ [activeLang][name],[activeLang][name] , ...]
   //          default[empty[]]     value=[pathCategories push idCategory]   sort [number revers pathsCategories]
-  if (typefield === "select") {
+  if (typefield === "selectCategoryPath") {
     const [theme, setTheme] = useState<string>("")
 
 
@@ -117,7 +119,11 @@ const GetTypeField : React.FC <iGetTypeFieldProps>  = function (
    var reversCategoryPath : number[]
    var valuesSelectCategoryPath = []
    var defaultValueEmptySelect : number[] = [0]
+   var categoryPathArrayString :  string[] =[]
+   var categoryPathArray :  number[] =[]
 
+
+   //TODO  pathCategories Strint to Array!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    pathsCategories.map((item) =>{   
     var keyIdNameCategories :  string = `arIdName${item.id.toString()}`
         
@@ -125,8 +131,15 @@ const GetTypeField : React.FC <iGetTypeFieldProps>  = function (
       idNameCategories[keyIdNameCategories] = { name: item?.categoryNameJson[baseLanguageCode]["name"] };
     }
     
+    //categoryPath to Array
+    categoryPathArrayString =[]
+    categoryPathArray=[]
+    if (item?.categoryPath) {     
+      categoryPathArrayString = item?.categoryPath.split(",")
+      categoryPathArrayString.map((item2, index) => { categoryPathArray[index] = parseInt(item2) })
+    }
 
-    valuesSelectCategoryPath = [...item.categoryPath, item.id]  //full path (value)
+    valuesSelectCategoryPath = [...categoryPathArray, item.id]  //full path (value)
     item["valuesSelectCategoryPath"] = valuesSelectCategoryPath
     
     // for sorting number FULL (value) category price
@@ -143,23 +156,12 @@ const GetTypeField : React.FC <iGetTypeFieldProps>  = function (
 
   } )
 
-  console.log('pathsCategories: ');
-  console.dir(pathsCategories, { depth: null });
-  
-  console.log('idNameCategories: ');
-  console.dir(idNameCategories, { depth: null });
-
-  // console.log('************************************TestedidNameCategories: ');
-  // console.log(idNameCategories[`arrayIdNAme${pathsCategories[0].id}`][`ru`][`name`]);
-
-
-  console.log('************************************baseLanguageCode: ', baseLanguageCode);
 
     return ( 
     <div>
       <Label htmlFor={`${namefieldlang}`}>{labelfield}</Label>
-      <Select value={field.value}  onValueChange={field.onChange}   >
-      <SelectTrigger  className="w-[280px]" value={field.value} onReset={() => form.resetField(namefieldlang)}>
+      <Select value={field.value}  onValueChange={field.onChange}>
+      <SelectTrigger  className="w-[1000px] bg-white" value={field.value} onReset={() => form.resetField(namefieldlang)}>
         <SelectValue  placeholder={placeholderfield}/>
       </SelectTrigger>
       <SelectContent>
@@ -168,7 +170,7 @@ const GetTypeField : React.FC <iGetTypeFieldProps>  = function (
         {/* <SelectItem value={`${defaultValueEmptySelect}`} >{`${idNameCategories["arIdName0"]["name"]}`}</SelectItem> */}
         <SelectLabel></SelectLabel>          
           {pathsCategories.map((item, index) => { if(item.valuesSelectCategoryPath) 
-            { return  <SelectItem value={`${item.valuesSelectCategoryPath}`} key={index+1}>
+            { return  <SelectItem value={`${item.valuesSelectCategoryPath.toString()}`} key={index+1} className="bg-indigo-300">
               { item.valuesSelectCategoryPath.map((item2, index2) => 
               { if (idNameCategories["arIdName"+item2]) { return ("<"+ idNameCategories["arIdName"+item2]["name"] + "> " )} } ) }  </SelectItem> }}  )
           }

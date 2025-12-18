@@ -24,7 +24,7 @@ export default function RootLayout({
         <div id='item_left_main' className='md:flex md:flex-row md:justify-start md:bg-violet-400'>
           <NavLeftMenu active={"true"} />
         </div>
-        <div id='item_right_main' className='md:flex md:flex-row md:w-full  md:justify-start ' >
+        <div id='item_right_main' className='md:flex md:flex-row md:w-full  md:justify-start' >
         {children} 
         </div>
       </div>

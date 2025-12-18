@@ -8,7 +8,7 @@ import { categoryInputFormFieldsDescriptionJson,
 // import { getActiveLanguages } from '@/utils/get-active-languages'
  import { use } from 'react';
 // import { $Enums } from '@prisma/client';
-import { getActiveLanguages } from '@/utils/get-active-languages';
+import { getActiveLanguages } from '@/utils/get-languages';
 
 // export default function categoryZodDefaultFormfield({
 //    activeLanguagesProps} : { 

@@ -15,7 +15,7 @@ const getPathsCategories = async () => {
     id: true,
     categoryNameJson: true,
  //   categoryDescriptionJson: true,
-    idParent: true,
+  //  idParent: true,
     categoryPath: true
     }
     
@@ -23,8 +23,7 @@ const getPathsCategories = async () => {
 
 
   const categoriesArr = []
-  pathsCategories.map((item) => {
-  console.log(`!!!!!!!!!item.id=${item.id}, item.categoryNameJson=${item.categoryNameJson}, item.idParent=${item.idParent}, item.categoryPath=${item.categoryPath}`);
+  pathsCategories.map((item) => { 
      // return {
     //   id: item.id,
     //   categoryDescriptionJson: item.categoryDescriptionJson,

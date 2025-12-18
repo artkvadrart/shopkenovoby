@@ -18,7 +18,9 @@ export interface iArrayNameFormField {
   defaultfield: string | number | boolean | string[] | number [],
   // zod: z.AnyZodObject | z.ZodString | z.ZodNumber | z.ZodBoolean | z.ZodTypeAny | z.ArrayCardinality ,
   zod: z.ZodTypeAny ,
-  typefield: "textarea" | "checkbox" | "input" | "switch" | "number" | "url" | "file" | "select",
+  typefield: "textarea" | "checkbox" | "input" | "switch" | "number" | "url" | "file" | "selectCategoryPath",
+  src : string,
+  srcThumb : string,
 }
 
 export interface INameFieldFormZod {
