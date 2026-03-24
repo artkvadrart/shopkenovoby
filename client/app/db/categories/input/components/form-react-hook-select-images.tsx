@@ -1,39 +1,37 @@
-import { getActiveLanguages, getBaseLanguage } from "@/utils/get-languages";
+import { getActiveLanguages, getBaseLanguage, iActiveLanguages, iBaseLanguages } from "@/utils/get-languages";
 import { getPathsCategories} from "@/utils/get-categories"
-import { iArrayNameFormField, INameFieldForm, INameFieldFormZod } from '@/types'
+import { iArrayNameFormField, INameFieldForm, INameFieldFormZod, iSelectedImages } from '@/types'
 import { UseFormReturn, Validate } from "react-hook-form";
 import { $Enums } from "@prisma/client";
 import { FormControl, FormDescription, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import GetTypeField from '@/app/db/categories/input/components/get-type-field'
 import z from "zod";
 
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dispatch, SetStateAction, useEffect } from "react";
 
 
   function FormReactHooksSelectedImages({
+    selectedImageProps,
+    setSelectedImageProps,
+    changePositionSelectedImagesProps,
+    deleteItemSelectedImagesProps,
     formControlProps,
     arrayNameFormFieldSelectedImagesProps,
     formProps,
     activeLanguagesProps,
     pathsCategoriesProps,
-    baseLanguageCodeProps 
+    baseLanguageCodeProps,
   }: {
+    selectedImageProps: iSelectedImages[] | undefined;
+    setSelectedImageProps: Dispatch<SetStateAction<iSelectedImages[] | undefined>>
+    changePositionSelectedImagesProps: (index: number, newIndex: number) => void;
+    deleteItemSelectedImagesProps: (index: number) => void;
     formControlProps: any;
     arrayNameFormFieldSelectedImagesProps: Array<iArrayNameFormField> ;
     formProps: UseFormReturn<Record<string, unknown>, any, Record<string, unknown>>;
-    activeLanguagesProps:{
-        id: number;
-        name: string;
-        code: string;
-        locale: string;  
-        language: $Enums.Language;
-        sort_order: number;
-        status: boolean;      
-        time: string;         
-        colorText: string;
-        colorBackground: string; 
-    }[];
+    activeLanguagesProps:iActiveLanguages[];
     pathsCategoriesProps: {
     id: number;
      // categoryNameJson: iJsonLangCategories;
@@ -44,7 +42,7 @@ import { Button } from "@/components/ui/button";
     valuesSelectCategoryPath?: number[];
     numberReversSortCategoryPath?: number
 }[];
-    baseLanguageCodeProps: string;
+    baseLanguageCodeProps: string;    
   }) {
     const arrayJSX: Array<React.ReactNode> = [];
     let srsImgPrev: string = '';
@@ -59,12 +57,11 @@ import { Button } from "@/components/ui/button";
     let i = 1;
 
 
- arrayNameFormFieldSelectedImagesProps.sort((a, b) =>
-      a.namefieldlangsort > b.namefieldlangsort ? 1 : -1
-    );
+// сортировка массива
+//  arrayNameFormFieldSelectedImagesProps.sort((a, b) =>
+//       a.namefieldlangsort > b.namefieldlangsort ? 1 : -1
+//     );
 
- 
-    
 
     arrayNameFormFieldSelectedImagesProps.map((description) => {
       variableNow = description.namefield;
@@ -99,7 +96,7 @@ import { Button } from "@/components/ui/button";
         onChange: undefined,
         onBlur: undefined,
         validate: z.string().min(5),
-        defaultValue: "четотам",
+        defaultValue: "-----",
         shouldUnregister: false,        
         shouldValidate: true,
         shouldTouch: false,
@@ -123,10 +120,14 @@ import { Button } from "@/components/ui/button";
           <>
           {srsImg ? 
           <div className={'row-span-' + lengthActiveLanguages + ' col-span-5 '}>
-            <div className="relative">
-              <img src={element.srcThumb} alt="" />
-              <Button variant="default" disabled={disabledButtonUp} size="icon" className="absolute top-4 left-4 size-10"><ChevronUpIcon /></Button>
-              <Button variant="default" disabled={disabledButtonDown} size="icon" className="absolute bottom-4 left-4 size-10"><ChevronDownIcon /></Button>              
+            <div className="relative w-fit">
+              <img src={element.srcThumb} alt="" className="mt-2 pt-2 rounded-sm" />
+              <Button variant="default" disabled={disabledButtonUp} size="icon" className="absolute bg-amber-300/50 top-4 left-4 size-10" 
+               onClick={(event) => {event.preventDefault(); changePositionSelectedImagesProps(index / lengthActiveLanguages, index / lengthActiveLanguages-1);  }} ><ChevronUpIcon /></Button>
+              <Button variant="default" disabled={disabledButtonDown} size="icon" className="absolute  bg-amber-300/50 bottom-4 left-4 size-10" 
+               onClick={(event) => {event.preventDefault(); changePositionSelectedImagesProps(index / lengthActiveLanguages, index / lengthActiveLanguages+1);  }}><ChevronDownIcon /></Button>
+               <Button variant="default"  size="icon" className="absolute  bg-red-300/50 top-4 right-4 size-10" 
+               onClick={(event) => {event.preventDefault(); deleteItemSelectedImagesProps(index / lengthActiveLanguages);  }}><XIcon/></Button>              
             </div>
           </div> : '' }
 

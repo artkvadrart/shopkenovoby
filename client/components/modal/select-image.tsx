@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label"
 import { Download, X, ImageDown, FolderOutput, FolderPlus, Folder, ImagePlus  } from 'lucide-react';
 import CardImageUpload from '@/components/form/card-image-upload';
 import { iArrayNameFormField, INameFieldForm, INameFieldFormZod, iSelectedImages } from '@/types'
-import { ChangeEvent, SetStateAction, useEffect, useState } from 'react';
+import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from 'react';
 import Image from 'next/image'
 import { Separator } from "../ui/separator";
 import CardImageCheckbox from "../form/card-image-checkbox";
@@ -26,6 +26,8 @@ import CardImageCheckboxCycle from "@/app/db/categories/input/components/card-im
 import { CreateFolder } from "../actions/create-folder";
 import { Modal } from '@/components/modal/modal'
 import { Upload } from '@/components/modal/upload'
+import { setNodeIndentFromDOM } from "lexical";
+import { setEngine } from "crypto";
 
 interface FilesState {
   [index: number]: FileObj
@@ -41,7 +43,7 @@ interface FileObj {
 
 interface iGetList {
   path: filePath,
-  fileArr: fileArr,
+ // fileArr: fileArr,
   directoryArr: directoryArr,
   message: 'Get list of files successfully!',
   status: 200
@@ -61,22 +63,18 @@ interface directoryArr {
 export  function SelectImage(
   {onCloseProps,   
    selectedImageProps, 
-   setSelectedImageProps,
- //  dataURNProps,
- //  setDataURNProps
+   setSelectedImageProps
   } : 
   {onCloseProps: () => void,
    selectedImageProps: iSelectedImages[] | undefined,
-   setSelectedImageProps(value: iSelectedImages[]): void // React.Dispatch<SetStateAction<string[]>>,
-
- //  dataURNProps: string,
- //   setDataURNProps(value: string): void
-   }){    
-    const [fileArr, setFileArr] = useState <string[]> ([]); // Array files from server
+   setSelectedImageProps: Dispatch<SetStateAction<iSelectedImages[] | undefined>> // React.Dispatch<SetStateAction<string[]>>
+  }){    
+   // const [fileArr, setFileArr] = useState <string[]> ([]); // Array files from server
     const [directoryArr, setDirectoryArr] = useState <string[]> ([]); // Array directories from server
 
-    const [pathArray, setPathArray] = useState <string[]> (['']);  // Array steps path step path
-    const [fulPathArray, setFulPathArray] = useState <string[]> (['']); // Array full path and name file
+    const [pathArray, setPathArray] = useState <string[]> (['']);  // Array steps path step path  
+    const [galleryImages, setGalleryImages] = useState <iSelectedImages[]>() // Array iSelectedImages (ULID URL URLthumb)
+    const [newGalleryImages, setNewGalleryImages] = useState <iSelectedImages[]>() // Array iSelectedImages (ULID URL URLthumb)
 
     const [isOpen, setIsOpen] = useState(false)
 
@@ -86,35 +84,32 @@ export  function SelectImage(
     const [uploadedImage, setUploadedImage] = useState([]);
 
 
-  const getList = (dataURN: string)  => {   // f.e. dataURN = "/namedirectory/aaa/bbb/ccc" 
+  const getList = (dataURN: string)  => {   // f.e. dataURN = ""  "/uploads"  "/namedirectory/aaa/bbb/ccc" 
   const params = new URLSearchParams();
   params.append('dataURN', dataURN);
   fetch(`/api/images?${params.toString()}`, {
     method: 'GET',
     headers: {'Content-Type': 'application/json',
     //   'Accept': 'application/json'
-     },
+    },
   }).then((response : Response) => {
     return response.json();
   }).then((data) => {    
-    data.fileArr && setFileArr(data.fileArr);
+    // data.fileArr && setFileArr(data.fileArr);
     data.directoryArr && setDirectoryArr(data.directoryArr);
-    let fullFileArr : string[] = []
-    data.fileArr && data.fileArr.map((item: string) => fullFileArr.push( `${process.env.NEXT_PUBLIC_PATH_START_IMAGES}${pathArray.join('/')}/${item}`))
-    setFulPathArray(fullFileArr);    
-    console.log("OK2****************************************************", data);
-    console.log("fullFileArr****************************************************", fullFileArr.length);
+    data.galleryImages && setGalleryImages(data.galleryImages);    
+    data.newGalleryImages && setNewGalleryImages(data.newGalleryImages);    
     return data;
   }).catch((error) => {
     console.error(error);  })
 }
 
-  useEffect(() =>  getList(pathArray.join('/')), [pathArray]);
-  useEffect(() =>  getList(pathArray.join('/')), [selectedImageProps]);
-  useEffect(() =>  getList(pathArray.join('/')), []);
+  useEffect(() =>  getList(pathArray.join('')), [pathArray]);
+  // useEffect(() =>  getList(pathArray.join('')), [selectedImageProps]);  
+  useEffect(() =>  getList(pathArray.join('')), []);
 
- function upFolder (dataURN: string) {  
-  setPathArray(pathArray => [...pathArray, dataURN]);
+ function upFolder (addURN: string) {  
+  setPathArray(pathArray => [...pathArray, addURN]);
  }
 
  function downFolder () {
@@ -125,6 +120,8 @@ export  function SelectImage(
     toast.success(`This is the first directory : `, { duration: 5000 });  }  
  }
 
+
+
     function onDeleteImg(index: number) {
         setUploadedImage((prevImages) => prevImages.filter((_, i) => i !== index));
     }
@@ -133,6 +130,7 @@ export  function SelectImage(
         setSrcObj((prevImages) => prevImages.filter((_, i) => i !== index));
         setFiles((prevImages) => prevImages.filter((_, i) => i !== index));
     }
+
 
   // const handleFileChange = (event : React.FormEvent<HTMLFormElement> ) : void => {
   const handleFileChange = (event : ChangeEvent<HTMLInputElement> ) : void => {
@@ -192,15 +190,19 @@ export  function SelectImage(
 
   return (
     <div >
-     <div onClick={onCloseProps} className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+     <div onClick={onCloseProps} className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800/50">
      <div onClick={(e) => e.stopPropagation()} >
      <Toaster />
      <ToastProvider /> 
 
     <Modal>              
-      {isOpen && <Upload onCloseProps={() => setIsOpen(false)}  
+      {isOpen && <Upload galleryImagesProps={galleryImages}
+                         setGalleryImagesProps={setGalleryImages}
+                         newGalleryImagesProps={newGalleryImages}
+                         setNewGalleryImagesProps={setNewGalleryImages}
+                         onCloseProps={() => setIsOpen(false)}  
                          setSelectedImageProps={setSelectedImageProps} 
-                         pathArrayProps = {pathArray}/>} //
+                         pathArrayProps = {pathArray}/>} 
     </Modal>
 
     <Card className="w-[80vw] max-w-[1800px]  h-svh max-h-max border-2 rounded-sm mt-6 bg-gray-100 border-red-400 overflow-scroll ">      
@@ -212,13 +214,22 @@ export  function SelectImage(
     </CardTitle>
 
     <div className="flex flex-row items-end justify-end w-[90%]  py-1 px-4 my-2 ">
-      <span className="flex ml-2 w-10/12 "><div className="text-gray-500">{pathArray.join('/')}</div></span>
+      <span className="flex ml-2 w-10/12 "><div className="text-gray-500">{pathArray.join('')}</div></span>
       <span className="flex ml-2 w-2/12 ">
-        <Button variant="link" size="lg" className="!h-6 !w-6 text-lg " onClick={() => setIsOpen(true)}>
-          <ImagePlus size={24} className="!h-6 !w-6 text-lg " />Download image
+        <Button variant="link" size="lg" className="h-6! w-6! text-lg " onClick={() => setIsOpen(true)}>
+          <ImagePlus size={24} className="h-6! w-6! text-lg " />Download image
         </Button>
       </span>
-      <span className="flex ml-2 w-2/12 "><CreateFolder directoryArrProps={pathArray}/></span>
+      <span className="flex ml-2 w-2/12 ">
+      <CreateFolder 
+                   pathArrayProps={pathArray} 
+                   galleryImagesProps={galleryImages} 
+                   setGalleryImagesProps={setGalleryImages} 
+                   newGalleryImagesProps={newGalleryImages} 
+                   setNewGalleryImagesProps={setNewGalleryImages} 
+                   directoryArrProps={directoryArr} 
+                   setDirectoryArrProps={setDirectoryArr}/>
+      </span>
     </div>
 
     <CardContent className="pt-4 pl-4 pr-2 pb-2">
@@ -234,21 +245,27 @@ export  function SelectImage(
       </Label>
     </div>
 
-    <form onSubmit={handleSubmit}>  
+    <form onSubmit={onCloseProps}>  
       <input type="file" id="file-upload-multiple" onChange={handleFileChange} className="hidden"  multiple accept="image/*" />
        {error && <p style={{ color: 'red' }}>{error}</p>}         
         </form>
       </CardContent>
 
-    <CardContent className="pl-6 pr-2 pb-2"> 
-      <CardImageCheckboxCycle  
-        fulPathArrayProps={fulPathArray}
+    <CardContent className="pl-2 pr-2 pb-2"> 
+      <CardImageCheckboxCycle         
+        selectedImageProps={selectedImageProps}
+        setSelectedImageProps={setSelectedImageProps}
+        galleryImagesProps={galleryImages}
+        setGalleryImagesProps={setGalleryImages} 
+        newGalleryImagesProps={newGalleryImages}
+        setNewGalleryImagesProps={setNewGalleryImages}       
         directoryArrProps={directoryArr} 
         upFolderProps={upFolder} />
     </CardContent>
 
-    <Label htmlFor="file-upload-multiple" className="flex items-center justify-center center">         
-      <div className="flex flex-row items-center justify-center w-2/6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 my-4 rounded">
+  <input type="button" id="select-files" name="select-files" onClick={onCloseProps} className="hidden"/>
+    <Label htmlFor="select-files" className="flex items-center justify-center center cursor-pointer">         
+      <div className="flex flex-row items-center justify-center w-2/6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 my-4 rounded-sm">
         <span><Download size={20} className="mr-2"/></span>
         <span>Выбрать файлы</span>
       </div>        

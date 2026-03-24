@@ -7,10 +7,14 @@ import { getPathsCategories } from "@/utils/get-categories";
 // ]
 // }
 
-interface IcategoryInputFormFields {
+export interface IcategoryInputFormFields {
    [key : string] : Array<IcategoryInputFormFieldsItem>
    //IcategoryInputFormFieldsItem[]
 }
+
+export interface ITypeField {
+typefield:  "textarea" | "checkbox" | "input" | "switch" | "number" | "url" | "file" | "selectPath" | "selectcurrency"  | "selectcategory"
+ }
 
 interface IcategoryInputFormFieldsItem {
   namefield: string,
@@ -21,7 +25,7 @@ interface IcategoryInputFormFieldsItem {
   // zod: z.AnyZodObject | z.ZodString | z.ZodNumber | z.ZodBoolean | z.ZodTypeAny | z.ArrayCardinality,
   // zod: z.AnyZodObject | z.ZodString | z.ZodNumber | z.ZodBoolean | z.ZodTypeAny | z.ArrayCardinality,
   zod: z.ZodTypeAny ,
-  typefield: "textarea" | "checkbox" | "input" | "number" | "url" | "file" | "selectCategoryPath" ,
+  typefield: ITypeField["typefield"],
   callFunc : string
 }
 
@@ -215,7 +219,7 @@ export const categoryInputFormFieldsNoTranslateData : IcategoryInputFormFields =
   ru : [
     // for delete {namefield : "idParent", labelfield : "родительская категория", placeholderfield : "родительская категория", descriptionfiled : "введите родительскую категорию", defaultfield : 1, zod : z.coerce.number().min(1), typefield : "number", callFunc :  ""},
     // **** categoryPath  react hook form не поддерживает select multiple поэтому categoryPath не массив, а строка(которая потом преобразуется в массив и обратно)
-    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "selectCategoryPath", callFunc :  "getPathsCategories"},
+    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "selectPath", callFunc :  "getPathsCategories"},
     // {namefield : "top", labelfield : "показывать в меню", placeholderfield : "показывать в меню", descriptionfiled : "отметьте если необходимо показать категорию в меню", defaultfield : false,  zod : z.boolean(), typefield : "checkbox", callFunc :  ""},
     // {namefield : "status", labelfield : "статус категории", placeholderfield : "статус категории", descriptionfiled : "статус категории", defaultfield : "actived",  zod : z.string().min(5), typefield : "switch", callFunc :  ""},
     {namefield : "furlCategory", labelfield : "seo имя категории", placeholderfield : "seo имя категории", descriptionfiled : "введите seo имя категории (пример: /hook)", defaultfield : "hooker",  zod : z.string().min(5), typefield : "input", callFunc :  ""},
@@ -227,7 +231,7 @@ export const categoryInputFormFieldsNoTranslateData : IcategoryInputFormFields =
   ],
   en : [
     // for delete {namefield : "idParent", labelfield : "родительская категория", placeholderfield : "родительская категория", descriptionfiled : "введите родительскую категорию", defaultfield : 1,  zod : z.coerce.number().min(1), typefield : "number", callFunc :  ""},
-    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "selectCategoryPath", callFunc :  "getPathsCategories"},
+    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "selectPath", callFunc :  "getPathsCategories"},
     // {namefield : "top", labelfield : "показывать в меню", placeholderfield : "показывать в меню", descriptionfiled : "отметьте если необходимо показать категорию в меню", defaultfield : false,  zod : z.boolean(), typefield : "checkbox", callFunc :  ""},
     // {namefield : "status", labelfield : "статус категории", placeholderfield : "статус категории", descriptionfiled : "статус категории", defaultfield : "",  zod : z.string().min(5), typefield : "switch", callFunc :  ""},
     {namefield : "furlCategory", labelfield : "seo имя категории", placeholderfield : "seo имя категории", descriptionfiled : "введите seo имя категории (пример: /hook)", defaultfield : "hooker",  zod : z.string().min(5), typefield : "input", callFunc :  ""},
@@ -239,7 +243,7 @@ export const categoryInputFormFieldsNoTranslateData : IcategoryInputFormFields =
   ],
   by : [
     // for delete {namefield : "idParent", labelfield : "родительская категория", placeholderfield : "родительская категория", descriptionfiled : "введите родительскую категорию", defaultfield : 1,  zod : z.coerce.number().min(1), typefield : "number", callFunc :  ""},
-    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "selectCategoryPath", callFunc :  "getPathsCategories"},
+    {namefield : "categoryPath", labelfield : "последовательность вложенных категорий", placeholderfield : "последовательность вложенных категорий", descriptionfiled : "последовательность вложенных категорий", defaultfield : "",  zod : z.string(), typefield : "selectPath", callFunc :  "getPathsCategories"},
     // {namefield : "top", labelfield : "показывать в меню", placeholderfield : "показывать в меню", descriptionfiled : "отметьте если необходимо показать категорию в меню", defaultfield : false,  zod : z.boolean(), typefield : "checkbox", callFunc :  ""},
     // {namefield : "status", labelfield : "статус категории", placeholderfield : "статус категории", descriptionfiled : "статус категории", defaultfield : "",  zod : z.string().min(5), typefield : "switch", callFunc :  ""},
     {namefield : "furlCategory", labelfield : "seo имя категории", placeholderfield : "seo имя категории", descriptionfiled : "введите seo имя категории (пример: /hook)", defaultfield : "hooker",  zod : z.string().min(5), typefield : "input", callFunc :  ""},

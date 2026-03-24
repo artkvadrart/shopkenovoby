@@ -1,4 +1,4 @@
-import { getActiveLanguages, getBaseLanguage } from "@/utils/get-languages";
+import { getActiveLanguages, getBaseLanguage, iActiveLanguages, iBaseLanguages } from "@/utils/get-languages";
 import { getPathsCategories} from "@/utils/get-categories"
 import { iArrayNameFormField, INameFieldForm, INameFieldFormZod } from '@/types'
 import { UseFormReturn } from "react-hook-form";
@@ -18,18 +18,7 @@ import GetTypeField from '@/app/db/categories/input/components/get-type-field'
     formControlProps: any;
     arrayNameFormFieldDescriptionJsonProps: Array<iArrayNameFormField>;
     formProps: UseFormReturn<Record<string, unknown>, any, Record<string, unknown>>;
-    activeLanguagesProps:{
-        id: number;
-        name: string;
-        code: string;
-        locale: string;  
-        language: $Enums.Language;
-        sort_order: number;
-        status: boolean;      
-        time: string;         
-        colorText: string;
-        colorBackground: string; 
-    }[];
+    activeLanguagesProps:iActiveLanguages[];
     pathsCategoriesProps: {
     id: number;
      // categoryNameJson: iJsonLangCategories;

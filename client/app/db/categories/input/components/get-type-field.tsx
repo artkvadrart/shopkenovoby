@@ -20,12 +20,14 @@ import { it } from "node:test";
 import { $Enums, Prisma } from "@prisma/client";
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { formSchema } from "./category-zod-default-formfield";
+// import { formSchema } from "./category-zod-default-formfield";
+import { iActiveLanguages } from "@/utils/get-languages";
+import { ITypeField } from "@/settings/category-input-form-fields";
 
 
 interface iGetTypeFieldProps {
   // form: UseFormReturn<{ [x: string]: any; }, any, undefined>
-  form: z.infer<typeof formSchema> | any | undefined,
+  form: UseFormReturn<Record<string, unknown>, any, Record<string, unknown>>;
   indexGet: number | string,
   namefield: string,
   namefieldlang: string,
@@ -33,24 +35,13 @@ interface iGetTypeFieldProps {
   placeholderfield: string,
   descriptionfiled: string,
   defaultfield: string | number | boolean | string[] | number[],
-  typefield: "textarea" | "checkbox" | "input" | "switch" | "number" | "url" | "file" | "selectCategoryPath",
+  typefield:  ITypeField["typefield"],
   field: any,
-  activeLanguages: {
-    id: number;
-    name: string;
-    code: string;
-    locale: string;  
-    language: $Enums.Language;
-    sort_order: number;
-    status: boolean;      
-    time: string;         
-    colorText: string;
-    colorBackground: string; 
-}[],
+  activeLanguages:iActiveLanguages[],
   pathsCategories:{
     id: number;
      // categoryNameJson: iJsonLangCategories;
-    categoryNameJson: PrismaJson.typeCategoryNameJson ;
+    categoryNameJson: PrismaJson.typeCategoryNameLangJson<JsonValue> ;
    // categoryDescriptionJson: JsonValue;
    //  idParent: number; for delete
     categoryPath: string;
@@ -108,13 +99,13 @@ const GetTypeField : React.FC <iGetTypeFieldProps>  = function (
 
   // sample   idCategory   pathsCategories   pathsCategories[ [activeLang][name],[activeLang][name] , ...]
   //          default[empty[]]     value=[pathCategories push idCategory]   sort [number revers pathsCategories]
-  if (typefield === "selectCategoryPath") {
+  if (typefield === "selectPath") {
     const [theme, setTheme] = useState<string>("")
 
 
    // all path categories pathCategories + idCategory VALUE
    var numberSortCategoryPath : number
-   var idNameCategories : PrismaJson.typeCategoryNameJson  = {} //| iIdNameCategories
+   var idNameCategories : PrismaJson.typeCategoryNameLangJson<JsonValue> = {} //| iIdNameCategories
   //     idNameCategories["arIdName0"] = { "name" : "Корневая категория [Main category]" }
    var reversCategoryPath : number[]
    var valuesSelectCategoryPath = []
@@ -126,9 +117,13 @@ const GetTypeField : React.FC <iGetTypeFieldProps>  = function (
    //TODO  pathCategories Strint to Array!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    pathsCategories.map((item) =>{   
     var keyIdNameCategories :  string = `arIdName${item.id.toString()}`
+   // const itemCategoryNameJson = JSON.parse(item.categoryNameJson) //item?.categoryNameJson
         
-    if (item?.categoryNameJson && typeof item?.categoryNameJson === 'object' && item?.categoryNameJson[baseLanguageCode]) {     
+   // if (item?.categoryNameJson && typeof item?.categoryNameJson === 'object' && item?.categoryNameJson[baseLanguageCode]) {     
+    if (item?.categoryNameJson  && item?.categoryNameJson[baseLanguageCode]) {     
       idNameCategories[keyIdNameCategories] = { name: item?.categoryNameJson[baseLanguageCode]["name"] };
+    //  console.log("item?.categoryNameJson[baseLanguageCode][name]:::::",item?.categoryNameJson[baseLanguageCode]["name"]);
+      
     }
     
     //categoryPath to Array
@@ -159,20 +154,21 @@ const GetTypeField : React.FC <iGetTypeFieldProps>  = function (
 
     return ( 
     <div>
-      <Label htmlFor={`${namefieldlang}`}>{labelfield}</Label>
-      <Select value={field.value}  onValueChange={field.onChange}>
+      {/* <Label htmlFor={`${namefieldlang}`}>{labelfield}</Label> */}
+      <div className="text-sm font-medium">{labelfield}</div>
+      <Select name={namefieldlang}  value={field.value}  onValueChange={field.onChange}>
       <SelectTrigger  className="w-[1000px] bg-white" value={field.value} onReset={() => form.resetField(namefieldlang)}>
-        <SelectValue  placeholder={placeholderfield}/>
+        <SelectValue id={namefieldlang}  placeholder={placeholderfield}/>
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
         
         {/* <SelectItem value={`${defaultValueEmptySelect}`} >{`${idNameCategories["arIdName0"]["name"]}`}</SelectItem> */}
-        <SelectLabel></SelectLabel>          
+        <SelectLabel ></SelectLabel>          
           {pathsCategories.map((item, index) => { if(item.valuesSelectCategoryPath) 
-            { return  <SelectItem value={`${item.valuesSelectCategoryPath.toString()}`} key={index+1} className="bg-indigo-300">
+            { return  <SelectItem value={`${item.valuesSelectCategoryPath.toString()}`} key={index+1} className="text-lg font-semibold bg-indigo-100">
               { item.valuesSelectCategoryPath.map((item2, index2) => 
-              { if (idNameCategories["arIdName"+item2]) { return ("<"+ idNameCategories["arIdName"+item2]["name"] + "> " )} } ) }  </SelectItem> }}  )
+              { if (idNameCategories["arIdName"+item2]) { return ("<"+ idNameCategories["arIdName"+item2]["name"] + "> " )} } ) }  888</SelectItem> }}  )
           }
           
         </SelectGroup>

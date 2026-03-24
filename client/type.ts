@@ -1,14 +1,57 @@
+import { JsonValue } from "@prisma/client/runtime/library";
+
 declare global {
    namespace PrismaJson {
-    export type typeCategoryNameJson = {
-      [key: string]: typeJsonLangCategories;
+    export type typeCategoryNameJson = { 
+      id: number; 
+      categoryNameJson: typeCategoryNameLangJson<JsonValue>; 
+      categoryNameSetParametrsJson: typeCategoryNameSetParametrsJson<JsonValue>; }[];
+    
+    export type typeCategoryNameLangJson<T> = {
+      [key: string]: typeCategoriesNameLangItemJson<T>;
     };
-    export type typeJsonLangCategories = {
-      [key: string]: typeJsonNameCategories;
+    export type typeCategoriesNameLangItemJson<T> = {
+      [key: string]: T;
     };
-    export type typeJsonNameCategories = {
-      [key: string]: string;
+    
+    export type typeCategoryNameSetParametrsJson<T> = {
+      [key: string]: typeCategoriesNameSetParametrsJson<T>;
+    };
+    export type typeCategoriesNameSetParametrsJson<T> = {
+      [key: string]: T;
     };  
+
+
+    export type typeProductNameJson = {
+      id: number; 
+      productNameJson:  typeProductNameLangJson<JsonValue>;// iProductsNameJson<JsonValue>   unknown   PrismaJson.typeCategoryNameJson;
+    }[];
+
+    export type typeProductNameLangJson<T> = {
+      [key: string]: typeProductNameLangItemJson<T>;
+    };
+
+    export type typeProductNameLangItemJson<T> = {
+      [key: string]: T;
+    };  
+
+
+
+    export type iGetProducts = 
+     { id: number; 
+      productNameJson:  PrismaJson.typeProductNameJson;// iProductsNameJson<JsonValue>   unknown   PrismaJson.typeCategoryNameJson;   
+    }[];
+
+
+export interface iProductsNameJson<T> {
+     [key: string]: IProductsNameItem<T>;
+     }
+     
+export interface IProductsNameItem<T>{
+     [key: string]: T;
+     }
+
+
 
 
 
@@ -18,6 +61,6 @@ declare global {
 }
 
 // The file MUST be a module! 
- export type {PrismaJson }
+ export type {PrismaJson}
 
 

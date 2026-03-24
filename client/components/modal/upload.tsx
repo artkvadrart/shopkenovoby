@@ -30,21 +30,29 @@ interface FileObj {
   alt: string;
 }
 
-
 export  function Upload(
   {onCloseProps,    
    setSelectedImageProps,
-   pathArrayProps}: 
+   pathArrayProps,
+   galleryImagesProps,
+   setGalleryImagesProps,
+   newGalleryImagesProps,
+   setNewGalleryImagesProps
+  }: 
   {onCloseProps: () => void,   
    setSelectedImageProps(value: iSelectedImages[]): void, // React.Dispatch<SetStateAction<string[]>>
-   pathArrayProps: string[]
+   pathArrayProps: string[],
+   galleryImagesProps: iSelectedImages[] | undefined,
+   setGalleryImagesProps: Function,
+   newGalleryImagesProps: iSelectedImages[] | undefined,
+   setNewGalleryImagesProps(value: iSelectedImages[]): void
    }){
   
     const [files, setFiles] = useState <File[]> ([]);          
     const [error, setError] = useState('');
     const [srcObj, setSrcObj] = useState <FilesState[]> ([]); 
     const [uploadedImage, setUploadedImage] = useState([]);
-
+   
     function onDeleteImg(index: number) {
         setUploadedImage((prevImages) => prevImages.filter((_, i) => i !== index));
     }
@@ -89,8 +97,8 @@ export  function Upload(
     for (const file of files) {
       formData.append('image', file);// Необходимо ипользовать одинаковый ключ для всех файлов
     }
-    formData.append('pathsaveimages', `${pathArrayProps.join('/')}/`)
-    console.log('pathsaveimages', `${pathArrayProps.join('/')}/`);
+    formData.append('pathsaveimages', `${pathArrayProps.join('')}`)
+    console.log('pathsaveimages', `${pathArrayProps.join('')}`);
     
 
     try {
@@ -104,7 +112,9 @@ export  function Upload(
       const data = await response.json();
         console.dir(data, { depth: null });
       if (response.ok) {      
-        setSelectedImageProps(data.selectedImages);  
+        setNewGalleryImagesProps(data.newGalleryImages);  
+        setGalleryImagesProps(data.galleryImages);  
+        // setSelectedImageProps(data.newGallery);  
         //setUploadedImage(data.url);
           console.dir(data.url, { depth: null }); 
         setSrcObj([]);        
@@ -121,7 +131,7 @@ export  function Upload(
       
   return (
     <div >
-     <div onClick={onCloseProps} className="overflow-scroll  fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+     <div onClick={onCloseProps} className="overflow-scroll  fixed inset-0 z-150 flex items-center justify-center bg-gray-800/50">
     <div onClick={(e) => e.stopPropagation()}>
     <Card  className="w-ulfl max-w-lg border-2 bg-gray-100 border-red-400 ">
       
@@ -139,7 +149,7 @@ export  function Upload(
         <form onSubmit={handleSubmit}>
                   
        <Label htmlFor="file-upload-multiple">         
-        <div className="flex flex-row items-center justify-center w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 my-4 rounded">
+        <div className="flex flex-row items-center justify-center w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 my-4 rounded-sm">
           <span><Download size={20} className="mr-2"/></span>
           <span>Выбрать файлы</span>
         </div>        

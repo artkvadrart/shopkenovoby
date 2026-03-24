@@ -1,4 +1,5 @@
 import { z, ZodTypeAny } from "zod";
+import { ITypeField } from "@/settings/product-input-form-fields";
 
 export interface INameFieldForm {
   [key: string]:  string | number | boolean | string[] | number [];
@@ -18,7 +19,7 @@ export interface iArrayNameFormField {
   defaultfield: string | number | boolean | string[] | number [],
   // zod: z.AnyZodObject | z.ZodString | z.ZodNumber | z.ZodBoolean | z.ZodTypeAny | z.ArrayCardinality ,
   zod: z.ZodTypeAny ,
-  typefield: "textarea" | "checkbox" | "input" | "switch" | "number" | "url" | "file" | "selectCategoryPath",
+  typefield: ITypeField["typefield"],
   src : string,
   srcThumb : string,
 }

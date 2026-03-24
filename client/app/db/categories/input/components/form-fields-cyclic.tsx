@@ -1,10 +1,10 @@
 'use client'
 import type {JSX} from 'react';
-import { use, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import React from 'react'
-import { $Enums, L18n } from '@prisma/client'
+import { $Enums, I18n } from '@prisma/client'
 import { z } from 'zod'
-import { iArrayNameFormField, INameFieldForm, INameFieldFormZod, iSelectedImages } from '@/types'
+import { iArrayNameFormField, iFromEditorJson, INameFieldForm, INameFieldFormZod, iSelectedImages } from '@/types'
 import { useForm, useFieldArray} from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form} from "@/components/ui/form"
@@ -16,12 +16,20 @@ import { categoryInputFormFieldsNameJson,
          categoryInputFormFieldsSeoJson,
          categoryInputFormFieldsNameSetParametrsJson, 
          categoryInputFormFieldsSelectedImages} from '@/settings/category-input-form-fields'
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
+// import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import { Button } from '@/components/ui/button'
-import GetTypeField from '@/app/db/categories/input/components/get-type-field'
-import axios from 'axios'
+// import GetTypeField from '@/app/db/categories/input/components/get-type-field'
+// import axios from 'axios'
 // import { JsonValue } from '@prisma/client/runtime/library'
-import { iFormFieldsCyclicProps, iIdNameCategories, iJsonLangCategories, iJsonNameCategories } from '@/types'
+// import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+// import { LexicalComposer } from '@lexical/react/LexicalComposer';
+// import {useSharedHistoryContext} from './editor/package/context/SharedHistoryContext';
+// import {useLexicalEditable} from '@lexical/react/useLexicalEditable';
+// import {useSettings} from './editor/package/context/SettingsContext';
+// import { $generateHtmlFromNodes } from '@lexical/html';
+// import type { EditorThemeClasses, LexicalEditor, SerializedEditorState, SerializedLexicalNode } from 'lexical';
+// import { divide } from 'lodash';  //lodash A modern JavaScript utility library delivering modularity, performance & extras.
+import { iCategoriesFormFieldsCyclicProps, iIdNameCategories, iJsonLangCategories, iJsonNameCategories } from '@/types'
 import { Modal } from '@/components/modal/modal'
 import { Upload } from '@/components/modal/upload'
 import FormReactHooksNoTranslateData  from './form-react-hooks-notranslatedata'
@@ -30,17 +38,11 @@ import FormReactHooksSeo from './form-react-hooks-seo'
 import FormReactHooksDescription  from './form-react-hooks-description'
 import FormReactHooksName from './form-react-hooks-name'
 import FormReactHooksSelectedImages from './form-react-hook-select-images'
-import LexicalComponentForm from './lexical/lexical-component-form'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import {useSharedHistoryContext} from './lexical/package/context/SharedHistoryContext';
-import {useLexicalEditable} from '@lexical/react/useLexicalEditable';
-import {useSettings} from './lexical/package/context/SettingsContext';
-
-import { $generateHtmlFromNodes } from '@lexical/html';
-import type { EditorThemeClasses, LexicalEditor, SerializedEditorState, SerializedLexicalNode } from 'lexical';
+import EditorComponentForm from './editor/editor-component-form'
 import { SelectImage } from '@/components/modal/select-image';
+import { typeFromEditorJson } from '@/types/editor';
+import { set } from 'lodash';
+import { EditorState } from 'lexical';
 
 
 interface iReactHookSelectedImages {
@@ -54,65 +56,25 @@ export interface iFormData {
   reactHookSelectedImages: iReactHookSelectedImage[];
 }
 
-const FormFieldsCyclic : React.FC<iFormFieldsCyclicProps> = function  (
+const FormFieldsCyclic : React.FC<iCategoriesFormFieldsCyclicProps> = function  (
   {
-    activeLanguagesProps, baseLanguageProps,  getPathsCategoriesProps, 
+    activeLanguagesProps, baseLanguageProps,  getPathsCategoriesProps
   }
 ) {
   const activeLanguages = use(activeLanguagesProps); // передаем функ => Promise
   const baseLanguage = use(baseLanguageProps); // передаем функ => Promise
   const pathsCategories = use(getPathsCategoriesProps); // передаем функ => Promise
-  const [isOpen, setIsOpen] = useState(false)
+  // const [isOpen, setIsOpen] = useState(false)
+  const [isClickSaveEditor, setIsClickSaveEditor] = useState(true)
   const [isOpenSelectImages, setIsOpenSelectImages] = useState(false)
-  // const [dataURN, setDataURN] = useState('/uploads') // /uploads
-  const [selectedImage, setSelectedImage] = useState <iSelectedImages[]>()
-  const [fromEditor, setFromEditor] = useState("")
-  const [fromEditorJson, setFromEditorJson] = useState<SerializedEditorState<SerializedLexicalNode>>()
-  const [lexicalEditor, setLexicalEditor] = useState ()
+  const [selectedImage, setSelectedImage] = useState <iSelectedImages[] | undefined>([])
+  // const [fromEditor, setFromEditor] = useState("")
+  const [fromEditorJson, setFromEditorJson] = useState<iFromEditorJson[]>()  
+  // const [fromEditorJson, setFromEditorJson] = useState<SerializedEditorState<SerializedLexicalNode>[]>([])
   const [updateLexical, setUpdateLexical] = useState(false)
   
-
-
-     //     const htmlContent = convertLexicalToHtml(lexicalEditor); 
-         
-
-// *************Lexical
-  //  const {historyState} = useSharedHistoryContext();
-  //   const {
-  //     settings: {
-  //       isCollab,
-  //       isAutocomplete,
-  //       isMaxLength,
-  //       isCharLimit,
-  //       hasLinkAttributes,
-  //       isCharLimitUtf8,
-  //       isRichText,
-  //       showTreeView,
-  //       showTableOfContents,
-  //       shouldUseLexicalContextMenu,
-  //       shouldPreserveNewLinesInMarkdown,
-  //       tableCellMerge,
-  //       tableCellBackgroundColor,
-  //       tableHorizontalScroll,
-  //       shouldAllowHighlightingWithBrackets,
-  //       selectionAlwaysOnDisplay,
-  //     },
-  //   } = useSettings();
-  //   // const isEditable = useLexicalEditable();
-  //   const placeholder = isCollab
-  //     ? 'Enter some collaborative rich text...'
-  //     : isRichText
-  //     ? 'Enter some rich text...'
-  //     : 'Enter some plain text...';
-  //   const [floatingAnchorElem, setFloatingAnchorElem] =
-  //     useState<HTMLDivElement | null>(null);
-  //   const [isSmallWidthViewport, setIsSmallWidthViewport] =
-  //     useState<boolean>(false);
-  //     // *************************************
-  //   // const [editor] = useLexicalComposerContext();
-  // const [editor] = useLexicalComposerContext();
-// *************end Lexical
-
+  var saveEditor : iFromEditorJson = {}      
+  const [fromEditorLngJson, setFromEditorLngJson] = useState <iFromEditorJson>({}) 
 
   var baseLanguageCode : string = "ru";
   baseLanguage ?  baseLanguageCode = baseLanguage.code : baseLanguageCode = "ru";
@@ -124,7 +86,6 @@ const FormFieldsCyclic : React.FC<iFormFieldsCyclicProps> = function  (
   const arrayNameFormFieldNameSetParametrsJson: Array<iArrayNameFormField> = []; //пустой начальный массив полей nameSetParametrsJson
   const arrayNameFormFieldSelectedImages: Array<iArrayNameFormField> = []; //пустой начальный массив полей SelectedImages
   const arrayNameFormFieldNoTranslateData: Array<iArrayNameFormField> = []; //пустой начальный массив полей noTranslateData
-
 
   activeLanguages.map((lang) => {
     categoryInputFormFieldsNameJson[lang.code].map(
@@ -261,8 +222,6 @@ const FormFieldsCyclic : React.FC<iFormFieldsCyclicProps> = function  (
 
   })
 
-
-
   categoryInputFormFieldsNoTranslateData[baseLanguageCode].map(
     (element, indexsort) => {
       nameFieldForm[element.namefield + "notranslate"] = element.zod; // формируем название полей и валидацию zod
@@ -301,108 +260,43 @@ const FormFieldsCyclic : React.FC<iFormFieldsCyclicProps> = function  (
     resolver: zodResolver(formSchema),
     defaultValues: {...formDefaultValues, },   
   });
-  
-  // const { control, handleSubmit } = useForm<iFormData>( {
-  // });
-
-  // const { fields, append, remove, move, update, insert } = useFieldArray({
-  //   control: form.control as any,  //TODO: any????
-  //   name: 'reactHookSelectedImages'   // имя массива полей в форме
-  // });
 
 
-//  // Функция для добавления новый полей в форму
-//     const addInFormSelectedImage = () => {
-//         append({questionText: '', options: []})
-//     }
+  function clickSaveEditor() {
+    setUpdateLexical(!updateLexical)
+    setIsClickSaveEditor(false)
+  }
 
+    const handleDataChange = (dataToSave: EditorState, lng: string) => {
+       setFromEditorLngJson(prevState => ({ ...prevState, [lng]: dataToSave, })); 
+    };
 
 
   const onSubmitWork = async (data: z.infer<typeof formSchema>) => {
-      setUpdateLexical(!updateLexical)  
-
-       console.log('fromEditor', fromEditor);
-
+    setUpdateLexical(!updateLexical)  
+       console.log('JSON.stringify(saveEditor22222222222', JSON.stringify(saveEditor));
     const dataAppendJson = JSON.stringify(data);
-    const fromEditorJsonAppendJson = JSON.stringify(fromEditorJson);
+    const fromEditorJsonAppendJson = JSON.stringify(fromEditorLngJson);
+    const selectedImageJson = JSON.stringify(selectedImage);
 
     toast.success(`God : `, { duration: 7000 });
     const formData = new FormData();
     formData.append("data", dataAppendJson);
     formData.append("fromEditorJson", fromEditorJsonAppendJson);
-      //  console.dir(formData, { depth: null });
-      //  console.log('formData11', formData.getAll("fromEditorJson"));
-        console.log(console.log(...formData.entries()));
+    formData.append("selectedImageJson", selectedImageJson);
 
-    // formData.append("fromEditorJson", JSON.stringify(fromEditorJson));
-    
-
-    // for (const item of data) {
-    //   formData.append(item[0], item[1]);
-    // }
-
-    try {
-      
+    try {      
       toast.success(`Dog :  `, { duration: 7000 });
       // console.log(`!!! Data:`);
       // ************ console.dir(nameFieldForm, { depth: null })
       // console.dir(data, { depth: null });
       // console.dir(fromEditorJson, { depth: null });
-
-
-      const response = await fetch('/api/input', {
+      const response = await fetch('/api/inputcategory', {
         method: 'POST',
         body: formData,
         // headers: {'Content-Type': 'multipart/form-data'},
       });
-
-
-
-      // ********** setLoading( value =>  value = true );
-
-
-      // await axios
-      //   .post(`/api/input`, data)
-      //   .then((responseRoute) => {
-      //     console.log(
-      //       ` responseRouteCategoryInput ------------- ${responseRoute.data} `
-      //     );        
-      //     toast.success(` ${responseRoute.data} `, { duration: 7000 });
-      //   })
-
-
-
-        // *****************.then( () => {setLoading( value =>  value = false ); })
-
-
-        // .catch((error) => {
-        //   toast.error(`Error response result: ${error}`, { duration: 7000 });
-        // });
-
-
-      // **********.finally( () => {setLoading( value =>  value = false ); })
-
-      // const toastMessage = JSON.stringify(data, null, 2);
-
-      // reset({
-      //   ...containerServiceSwitchNameField,
-      //   dateOrder: new Date(),
-      //   customer: '',
-      //   email: '',
-      //   emailSec: 'my@m.m',
-      //   address: '',
-      //   phone: '',
-      //   note: ''
-
-      //  } );
-
-      // setTimeout( ( ) => {
-      //   router.push(`/${language}/form`);
-      //   window.location.reload();
-      //  }, 7000)
-
-      // setLoading( value =>  value = false );
-
+      
       const dataResponse = await response.json();
         console.dir(dataResponse, { depth: null });
             if (response.ok) {      
@@ -412,26 +306,27 @@ const FormFieldsCyclic : React.FC<iFormFieldsCyclicProps> = function  (
       }
     } catch (error: any) {
       console.log(` ErrorrErro ------------- ${error} `);
-      toast.error(`ErrorrError`, { duration: 5000 });
-      // setLoading( value =>  value = false );
+      toast.error(`ErrorrError`, { duration: 5000 });     
     } finally {
       // setLoading( value =>  value = false );
     }
   };
 
-
-  
-   function OutEditorState({editorTextProps, editorTextJsonProps} : {editorTextProps: string, editorTextJsonProps: SerializedEditorState<SerializedLexicalNode> | undefined} ) {
-    return (
-      <div className='w-min border-2 border-stone-300 rounded-sm p-4 mt-4'>
-        {`EditorState:${editorTextProps}`}
-        <span><br/><br/>*****************************************************<br/><br/></span>
-        {`EditorStateJson:${ JSON.stringify(editorTextJsonProps) || editorTextJsonProps}`}
-      </div>
-    )
+   function changePositionSelectedImages(index: number, newIndex: number) {
+    // event.preventDefault();
+    const arr : any = [...selectedImage ?? []];   
+    let temp = arr[index];
+    arr[index] = arr[newIndex]; 
+    arr[newIndex] = temp;    
+    setSelectedImage([...arr])  
   }
 
-
+   function deleteItemSelectedImages(index: number) {
+    // event.preventDefault();
+    const arr : any = [...selectedImage ?? []]; 
+    arr.splice(index, 1);   
+    setSelectedImage([...arr])  
+  }
 
   return (
     <div className={isOpenSelectImages  ? 'overscroll-y-none overflow-auto overs' : ''} >      
@@ -454,23 +349,43 @@ const FormFieldsCyclic : React.FC<iFormFieldsCyclicProps> = function  (
           {FormReactHooksDescription({ formControlProps: form.control, arrayNameFormFieldDescriptionJsonProps: arrayNameFormFieldDescriptionJson, formProps: form, activeLanguagesProps: activeLanguages, pathsCategoriesProps: pathsCategories, baseLanguageCodeProps: baseLanguageCode })}
           {FormReactHooksSeo({ formControlProps: form.control, arrayNameFormFieldSeoJsonProps: arrayNameFormFieldSeoJson, formProps: form, activeLanguagesProps: activeLanguages, pathsCategoriesProps: pathsCategories, baseLanguageCodeProps: baseLanguageCode })}
           {FormReactHooksNameSetParametrs({ formControlProps: form.control, arrayNameFormFieldNameSetParametrsJsonProps: arrayNameFormFieldNameSetParametrsJson, formProps: form,  activeLanguagesProps: activeLanguages, pathsCategoriesProps: pathsCategories, baseLanguageCodeProps: baseLanguageCode })}  
-          {FormReactHooksSelectedImages({ formControlProps: form.control, arrayNameFormFieldSelectedImagesProps: arrayNameFormFieldSelectedImages, formProps: form,  activeLanguagesProps: activeLanguages, pathsCategoriesProps: pathsCategories, baseLanguageCodeProps: baseLanguageCode })}  
+    
+          <FormReactHooksSelectedImages selectedImageProps = {selectedImage}  
+                                        setSelectedImageProps = {setSelectedImage} 
+                                        changePositionSelectedImagesProps = {changePositionSelectedImages}  
+                                        deleteItemSelectedImagesProps = {deleteItemSelectedImages}  
+                                        formControlProps= {form.control}  
+                                        arrayNameFormFieldSelectedImagesProps= {arrayNameFormFieldSelectedImages} 
+                                        formProps= {form}  
+                                        activeLanguagesProps= {activeLanguages} 
+                                        pathsCategoriesProps= {pathsCategories} 
+                                        baseLanguageCodeProps= {baseLanguageCode}                                         
+                                        />
           {FormReactHooksNoTranslateData({ formControlProps: form.control , arrayNameFormFieldNoTranslateDataProps: arrayNameFormFieldNoTranslateData, formProps: form, activeLanguagesProps: activeLanguages, pathsCategoriesProps: pathsCategories, baseLanguageCodeProps: baseLanguageCode })}
-          
-        <Button type='button' variant={"default"} className='w-80 text-3xl md:text-3xl bg-red-400' size={"lg"}  onClick={() => setIsOpen(true)} >#Upload images</Button>
-        {/* {FormReactHookSelectImages({ formControlProps: form.control , formProps: form, activeLanguagesProps: activeLanguages, pathsCategoriesProps: pathsCategories, baseLanguageCodeProps: baseLanguageCode, selectedImageProps: selectedImage, setSelectedImageProps : () => setSelectedImage,  addInFormSelectedImageProps: () =>  addInFormSelectedImage(), appendProps: append })} */}
-          <LexicalComponentForm  setFromEditorProps={setFromEditor} setFromEditorJsonProps={setFromEditorJson} updateStateProps={updateLexical} />
-          <Button type='button' variant={"default"} className='w-80 text-3xl md:text-3xl bg-teal-400' size={"lg"}  onClick={() => setIsOpenSelectImages(true)} >#Select images</Button>
-          <Button type='submit' variant={"default"} className='w-80 text-3xl md:text-3xl' size={"lg"}>#Впирод</Button>
-          {/* <Button type='button' variant={"default"} className='w-80 text-3xl md:text-3xl' size={"lg"} onClick={() => hundleOnClickButtonSubmit()}>FromEdit</Button> */}
-          {/* <OutEditorState editorTextProps={fromEditor} editorTextJsonProps={fromEditorJson} /> */}
+         
+        {/* <Button type='button' variant={"default"} className='w-80 text-3xl md:text-3xl bg-red-400' size={"lg"}  onClick={() => setIsOpen(true)} >#Upload images</Button> */}
 
+
+            { activeLanguages.map((activeLanguage, index) => (
+            <EditorComponentForm key={index*3} 
+            languageCodeProps={activeLanguage.code}  
+            fromEditorJsonProps={fromEditorJson} 
+            setFromEditorJsonProps={setFromEditorJson}          
+            setFromEditorLngJsonProps={handleDataChange} 
+            updateStateProps={updateLexical} />
+            )) 
+            }  
+          
+          <Button type='button' variant={"default"} className='w-80 text-3xl md:text-3xl bg-teal-400' size={"lg"}  onClick={() => clickSaveEditor()} >#SaveEditor</Button>
+          <Button type='button' variant={"default"} className='w-80 text-3xl md:text-3xl bg-teal-400' size={"lg"}  onClick={() => setIsOpenSelectImages(true)} >#Select images</Button>
+          <Button type='submit' disabled={isClickSaveEditor} variant={"default"} className='w-80 text-3xl md:text-3xl' size={"lg"}>#Впирод</Button>        
+         
+          {/* {fromEditorLngJson && <p>fromEditorLngJson: {JSON.stringify(fromEditorLngJson)}</p> }         */}
         </form>
       </Form>
       </div>
     </div>
   );
 }
-
 
 export default FormFieldsCyclic

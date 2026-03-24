@@ -15,18 +15,19 @@ generator json {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"  
+  url="postgresql://psqluser:@ChinaBy77@localhost:5432/shopkenovoby?schema=public"
+  // url      = env("DATABASE_URL")
   // extensions = [hstore(schema: "myHstoreSchema"), pg_trgm, postgis(version: "2.1")]
 }
 
 
 
-model Category{
+model Category {
   id Int @id @default(autoincrement())
 
-  /// [typeCategoryNameJson]
-  categoryNameJson Json /// [typeCategoryNameJson] 
+  /// [typeCategoryNameLangJson<T>]
+  categoryNameJson Json   
   // {"en": { "name" : "nameEN"}, "ru": { "name" : "nameRU"}, "by": {"name" : "nameBY"}  }
 
   /// [typeCategoryDescriptionJson]
@@ -56,13 +57,16 @@ model Category{
  // product Product @relation("Product", fields: [idProduct], references: [id]) //name parametrs for filter Product {"p1" : }
   // idProduct Int 
 
-  images Json 
-  // {"en": { "src": "/profile.png", "alt" : "imagesEN", "placeholder" : "volumeEN"},
-      // "ru": { "src": "/profile.png", "alt" : "imagesRU", "placeholder" : "volumeRU"},
-      // "by": { "src": "/profile.png", "alt" : "imagesBY", "placeholder" : "volumeBY"} }
+  editorCategoryJson EditorCategoryJson? @relation("EditorJson", fields: [idEditorJson], references: [id])
+  idEditorJson Int @unique
+
+  imagesJson Json 
+  // {"en": { "src": "/profile.png", "alt" : "imagesEN", "type": "avatar", "placeholder" : "volumeEN"},
+      // "ru": { "src": "/profile.png", "alt" : "imagesRU",  "type": "main", "placeholder" : "volumeRU"},
+      // "by": { "src": "/profile.png", "alt" : "imagesBY",  "type": "avatar", "placeholder" : "volumeBY"} }
 
   // category Category[] @relation(name:"Product")
-  product Product[] @relation(name:"Product")
+  product Product[] @relation(name:"ProductCategory")
 
   // category Product @relation("CategoryProduct", fields: [idProduct], references: [id]) //name parametrs for filter Product {"p1" : }
   // idProduct Int 
@@ -83,7 +87,7 @@ model Category{
   codeChange String?
 
   avatar String?  //link small image if need
-  image String?
+  image String?  // TODO: for delete
  // images String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -95,25 +99,28 @@ model Category{
 model Product {
   id Int @id @default(autoincrement())
 
+  /// [typeProductNameLangJson<T>]
+  productNameJson Json
+  
   productDescriptionJson ProductDescriptionJson @relation("ProductDescriptionJson", fields: [idProductDescriptionJson], references: [id])
-  idProductDescriptionJson Int 
+  idProductDescriptionJson Int @unique
 
-  description Json // name name1c description tag metaTitle metaDescription metaKeyword 
+  productSeoJson ProductSeoJson @relation("ProductSeoJson", fields: [idProductSeoJson], references: [id])
+  idProductSeoJson Int @unique 
+
+  categories Category[] @relation(name: "ProductCategory")
+
+  // product Category @relation("Product", fields: [idCategory], references: [id]) //name parametrs for filter Product {"p1" : }
+  // idCategory Int 
   
-  joinGroupId Int @default(0) //0- не имеет вариантов товара, х-номер Id Product варианта этого товара 
+  joinGroupId Int[]  @default([]) //[]- не имеет вариантов товара, х-номер Id Product варианта этого товара 
   
-  // category Category[] @relation(name:"Product")
-
-  product Category @relation("Product", fields: [idCategory], references: [id]) //name parametrs for filter Product {"p1" : }
-  idCategory Int 
-
-
+  
   // Order Order @relation(name:"productOrder")
   orderInProducts Order @relation(name:"productsOrder", fields: [idOrder], references: [id])
   idOrder Int
 
   ordersInProduct Order[] @relation(name:"productOrders")
-
 
   furlProduct String @unique // frandly URL  samsung/    hook/ or = model
   model String? // модель товара, можно выводить в названия?? пример gsh17
@@ -125,18 +132,30 @@ model Product {
   jan String?  
   isbn String?
   mpn String?
+  code1c String? //по умолчанию равно seo name
+  codechange String? // по умолчанию равно seo name
+
   quantity Int
+  subtract Boolean @default(true) //need to 
   stockStatus StockStatus 
 
-   price Float
+  currency Currency @relation(name:"Currency", fields: [idCurrency], references: [id]) //name parametrs for filter Product {"p1" : }
+  idCurrency Int 
+
+  // idCurrency Currency @relation(name:"currency") //?????????????????????????console.log( nameFieldForm['titleH1'+lang.code] );
+  price Float
   price1 Float
   price2 Float
 
-  priceUSD Float?  
+  priceUSD Float? // price/
+  priceUSD1 Float? // price/
+  priceUSD2 Float? // price/
   priceEUR Float?
+  priceEUR1 Float?
+  priceEUR2 Float?
 
-  idCurrency Int //?????????????????????????console.log( nameFieldForm['titleH1'+lang.code] );
-  dateAvailabale DateTime  
+  
+  dateAvailabale DateTime  // is off is dataNow<dateAvailabale
 
   weight Float?
   unitWeightJson UnitWeightJson @relation("UnitWeightJson", fields: [idUnitWeightJson], references: [id])
@@ -154,18 +173,18 @@ model Product {
   unitHeightJson UnitHeightJson @relation("UnitHeightJson", fields: [idUnitHeightJson], references: [id])
   idUnitHeightJson Int
 
-  setParametrsJson SetParametrsJson @relation("SetParametrsJson", fields: [idSetParametrsJson], references: [id])
-  idSetParametrsJson Int
+  dataSetParametrsJson DataSetParametrsJson @relation("DataSetParametrsJson", fields: [idDataSetParametrsJson], references: [id])
+  idDataSetParametrsJson Int
 
   manufactured Manufacturer @relation("manufactured", fields: [idManufacturer], references: [id])
   idManufacturer Int 
   
-  subtract Boolean @default(true) //need to 
+  
   status Int @default(0)
 
-  avatar String?  //small image if need
-  image String?
-  images String[]
+  
+  imagesJson Json   // {"en": { "src": "/profile.png", "alt" : "imagesEN", "type": "avatar", "placeholder" : "volumeEN"},
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
   
@@ -173,16 +192,44 @@ model Product {
 }
 
 //***********************************************************************************
+model EditorCategoryJson {
+  id Int @id @default(autoincrement())  
+  category Category? @relation(name:"EditorJson")
+  editorCategoryJson Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+//***********************************************************************************
+
+// model ProductNameJson {
+//   id Int @id @default(autoincrement())
+//   product Product? @relation(name: "ProductNameJson")  
+//   name Json // name   
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @default(now()) @updatedAt
+// }
+
+//***********************************************************************************
 
 model ProductDescriptionJson {
   id Int @id @default(autoincrement())
-  Product Product[] @relation("ProductDescriptionJson")  
-  description Json // name name1c description tag metaTitle metaDescription metaKeyword 
+  product Product? @relation("ProductDescriptionJson")  
+  description Json // titleH1   description  descriptionextendet
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
 
 //***********************************************************************************
+
+model ProductSeoJson {
+  id Int @id @default(autoincrement())
+  product Product? @relation("ProductSeoJson")  
+  seo Json // metadataBase titleMeta description tag metaTitle metaDescription metaKeyword 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+//*
 
 model UnitWeightJson {
   id    Int  @id @default(autoincrement())  
@@ -224,10 +271,10 @@ model UnitHeightJson {
 
 // ----------------------------------------------------
 
-model SetParametrsJson {
+model DataSetParametrsJson {
   id    Int  @id @default(autoincrement())  
-  product Product[] @relation("SetParametrsJson")
-  setParametrsJson Json //  { [{"ru": "name"}, ......] }
+  product Product[] @relation("DataSetParametrsJson")
+  dataSetParametrsJson Json //  { [{"ru": "name"}, ......] } filled fielddata
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
@@ -388,24 +435,24 @@ model OrderPayment {
 }
 
 //*******************************************************************
-model L18n {
-  id Int @id @default(autoincrement())
-  name String // «English»); 
-  code String // ISO-639-1 (например, «en» для английского); 
-  locale String // локаль языка (например, «en-US.UTF-8,en-US,en-gb,en-gb, english»); 
-  language Language //ENum Active Language
-  image String
-  time String
-  colorText String @default("black")
-  colorBackground String @default("white")
-  sort_order Int @default(1)
-  status Boolean //active or no
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-}
+// model L18n {  ////  need Delete  
+//   id Int @id @default(autoincrement())
+//   name String // «English»); 
+//   code String // ISO-639-1 (например, «en» для английского); 
+//   locale String // локаль языка (например, «en-US.UTF-8,en-US,en-gb,en-gb, english»); 
+//   language Language //ENum Active Language
+//   image String
+//   time String
+//   colorText String @default("black")
+//   colorBackground String @default("white")
+//   sort_order Int @default(1)
+//   status Boolean //active or no
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @default(now()) @updatedAt
+// }
 
 //*******************
-model I18n {   ////  need dELETE
+model I18n {   ////  
   id Int @id @default(autoincrement())
   name String // «English»); 
   code String // ISO-639-1 (например, «en» для английского); 
@@ -424,14 +471,29 @@ model I18n {   ////  need dELETE
 //*******************
 
 model Currency {
-id    Int     @id @default(autoincrement())
+id Int @id @default(autoincrement())
+product Product[] @relation(name:"Currency")
+isDefault Boolean @default(false)
+isActive Boolean @default(true)
 codeCurrency String
 valueCurrency Float    // значение валюты относительно базовой валюты магазина; 
-
+createdAt DateTime @default(now())
+updatedAt DateTime @default(now()) @updatedAt
 }
 
 
 // *********************************************************************************
+
+// model ProductCategory {
+//   id Int @id @default(autoincrement())
+//   product   Product?   @relation("ProductCategory", fields: [productId], references: [id])
+//   category   Category?   @relation("ProductCategory", fields: [categoryId], references: [id])
+//   productId Int
+//   categoryId Int
+//   @@unique([productId, categoryId])
+// }
+
+
 // Auth with Prisma Postgres
 model User {
   id            String          @id @default(cuid())

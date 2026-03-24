@@ -1,31 +1,23 @@
 import { $Enums } from "@prisma/client";
 
-export interface iFormFieldsCyclicProps {
+export interface iCategoriesFormFieldsCyclicProps {
   activeLanguagesProps: Promise<
     {
       id: number;
       name: string;
-      code: string;
-      locale: string;
+      code: string;      
       language: $Enums.Language;
       sort_order: number;
-      status: boolean;
-      time: string;
-      colorText: string;
-      colorBackground: string;
+      status: boolean;      
     }[]
   >;
   baseLanguageProps: Promise<{
     id: number;
     name: string;
-    code: string;
-    locale: string;
+    code: string;    
     language: $Enums.Language;
     sort_order: number;
     status: boolean;
-    time: string;
-    colorText: string;
-    colorBackground: string;
   } | null>;
   getPathsCategoriesProps: Promise<
     {
@@ -34,8 +26,10 @@ export interface iFormFieldsCyclicProps {
       categoryPath: string;
       valuesSelectCategoryPath?: number[];
       numberReversSortCategoryPath?: number;
-    }[]
+    }[]    
   >;
+  // inverterProps: (inverter: boolean) => boolean
+  //inverterProps:  boolean
 }
 
 export interface iIdNameCategories {
